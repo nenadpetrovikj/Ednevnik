@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a professor</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <script src="../static/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <h1>Add a new professor</h1>
+  <form method="post" action="/professors">
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Surname</th>
+        <th>Role/Title</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="name">
+        </td>
+        <td>
+          <input type="text" name="surname">
+        </td>
+        <td>
+          <select name="professorRole">
+            <option th:each="professorRole : ${professorRoles}" th:value="${professorRole}" th:text="${professorRole}"></option>
+          </select>
+        </td>
+        <td>
+          <button type="submit">Add professor</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+  <a href="/professors">[Back]</a>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a NNS Meeting</title>
+</head>
+<body>
+<h1>Add a new NNS Meeting</h1>
+<form method="post" action="/nns-meetings">
+    <table>
+        <tr>
+            <th>Serial Code</th>
+            <th>Date</th>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="serialCode">
+            </td>
+            <td>
+                <input type="date" name="date">
+            </td>
+            <td>
+                <button type="submit">Add NNS Meeting</button>
+            </td>
+        </tr>
+    </table>
+</form>
+<a href="/nns-meetings">[Back]</a>
+
+</body>
+</html>

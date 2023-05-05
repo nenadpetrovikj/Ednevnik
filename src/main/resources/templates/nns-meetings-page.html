@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NNS Meetings</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <script src="../static/js/bootstrap.min.js"></script>
+</head>
+<body>
+<h1>NNS Meetings</h1>
+<a href="/nns-meetings/add">[Add a new NNS Meeting]</a>
+<br>
+<h3>All NNS Meetings Sorted By Date In Descending Order</h3>
+<table>
+    <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Serial Number</th>
+    </tr>
+    <tr th:each="nnsmeeting, iterator : ${nnsMeetings}">
+        <td th:text="${iterator.index+1 + '. '}"></td>
+        <td th:text="${nnsmeeting.date}"></td>
+        <td th:text="${nnsmeeting.serialCode}"></td>
+        <td>
+            <a th:href="@{'/nns-meetings/{id}/add-topic' (id=${nnsmeeting.id})}">[Add topic to this NNS Meeting]</a>
+        </td>
+        <td>
+            <a th:href="@{'/nns-meetings/{id}/topics-list' (id=${nnsmeeting.id})}">[Show list of topics for this NNS Meetings]</a>
+        </td>
+    </tr>
+</table>
+<br>
+<a href="/home">[Home]</a>
+</body>
+</html>

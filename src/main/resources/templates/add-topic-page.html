@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add topics page</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <script src="../static/js/bootstrap.min.js"></script>
+</head>
+<body>
+<h1>Add a topic for this NNS Meeting of date: <span th:text="${nnsMeeting.date}"></span></h1>
+
+<form method="post" action="/topics">
+    <table>
+        <tr>
+            <th>Category name</th>
+            <th>Subcategory name</th>
+            <th>Description</th>
+            <th>SerialNumber</th>
+            <th>Is it accepted</th>
+            <th>Discussion</th>
+            <th>Student name</th>
+            <th>Student surname</th>
+            <th>Professor</th>
+<!--        <th>Committee/Authors</th>-->
+        </tr>
+        <tr>
+            <td>
+                <select name="categoryName">
+                    <option th:each="category : ${topicCategories}" th:value="${category}"
+                            th:text="${category}"></option>
+                </select>
+            </td>
+            <td>
+                <input type="text" name="subCategoryName">
+            </td>
+            <td>
+                <input type="text" name="description">
+            </td>
+            <td>
+                <input type="number" name="serialNumber">
+            </td>
+            <td>
+                <select name="isAccepted">
+                    <option value="0">False</option>
+                    <option value="1">True</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" name="discussion">
+            </td>
+            <td>
+                <input type="text" name="studentName">
+            </td>
+            <td>
+                <input type="text" name="studentSurname">
+            </td>
+            <td>
+                <select name="professorId">
+                    <option th:each="professor : ${professors}" th:value="${professor.id}"
+                            th:text="${professor.name + ' ' + professor.surname}"></option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="nnsMeetingId" th:value="${nnsMeeting.id}" hidden="hidden"> <!-- th:field="*{id}" th:value="${param.id}" -->
+            </td>
+            <td>
+                <button type="submit">Add topic</button>
+            </td>
+        </tr>
+    </table>
+</form>
+<a href="/nns-meetings">[Back]</a>
+</body>
+</html>
