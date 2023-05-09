@@ -12,10 +12,10 @@
 <form method="post" action="/topics">
     <table>
         <tr>
+            <th>SerialNumber</th>
             <th>Category name</th>
             <th>Subcategory name</th>
             <th>Description</th>
-            <th>SerialNumber</th>
             <th>Is it accepted</th>
             <th>Discussion</th>
             <th>Student name</th>
@@ -24,6 +24,9 @@
             <th>Committee/Authors</th>
         </tr>
         <tr>
+            <td>
+                <input type="text" name="serialNumber">
+            </td>
             <td>
                 <select name="categoryName">
                     <option th:each="category : ${topicCategories}" th:value="${category}"
@@ -35,9 +38,6 @@
             </td>
             <td>
                 <input type="text" name="description">
-            </td>
-            <td>
-                <input type="number" name="serialNumber">
             </td>
             <td>
                 <select name="isAccepted">

@@ -6,6 +6,7 @@ import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
 import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
 import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
+import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,10 +21,12 @@ public class NNSMeetingController {
 
     private final NNSMeetingService nnsMeetingService;
     private final ProfessorService professorService;
+    private final TopicService topicService;
 
-    public NNSMeetingController(NNSMeetingService nnsMeetingService, ProfessorService professorService) {
+    public NNSMeetingController(NNSMeetingService nnsMeetingService, ProfessorService professorService, TopicService topicService) {
         this.nnsMeetingService = nnsMeetingService;
         this.professorService = professorService;
+        this.topicService = topicService;
     }
 
     @GetMapping
@@ -59,6 +62,7 @@ public class NNSMeetingController {
     public String showListTopicsPage(Model model, @PathVariable Long id) {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(id);
         List<Topic> topics = nnsMeeting.getTopics();
+        topics = topicService.sortTopicsBySerialNumber(topics);
         model.addAttribute("nnsMeeting", nnsMeeting);
         model.addAttribute("topics", topics);
         return "list-topics";

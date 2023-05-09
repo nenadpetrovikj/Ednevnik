@@ -19,7 +19,7 @@ public class Topic {
 
     private String subCategoryName; // type
     private String description;
-    private Double serialNumber;
+    private String serialNumber;
     private Boolean isAccepted;
     private String discussion;
 
@@ -35,7 +35,7 @@ public class Topic {
     @ManyToMany
     private List<Professor> professors;
 
-    public Topic(TopicCategory categoryName, String subCategoryName, String description, Double serialNumber, Boolean isAccepted, String discussion, NNSMeeting nnsMeeting, Student student, Professor professor, List<Professor> professors) {
+    public Topic(TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, NNSMeeting nnsMeeting, Student student, Professor professor, List<Professor> professors) {
         this.categoryName = categoryName;
         this.subCategoryName = subCategoryName;
         this.description = description;

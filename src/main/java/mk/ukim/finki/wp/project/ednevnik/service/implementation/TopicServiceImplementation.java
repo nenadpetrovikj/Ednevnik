@@ -14,6 +14,7 @@ import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -44,7 +45,7 @@ public class TopicServiceImplementation implements TopicService {
     }
 
     @Override
-    public Topic create(TopicCategory categoryName, String subCategoryName, String description, Double serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException {
+    public Topic create(TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(nnsMeetingId);
         Student student = studentService.create(studentName, studentSurname);
         Professor professor = professorService.findById(professorId);
@@ -53,7 +54,7 @@ public class TopicServiceImplementation implements TopicService {
     }
 
     @Override
-    public Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, Double serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, Long studentId, Long professorId, List<Long> professorIds) {
+    public Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, Long studentId, Long professorId, List<Long> professorIds) {
         return null;
     }
 
@@ -62,5 +63,11 @@ public class TopicServiceImplementation implements TopicService {
         Topic topic = findById(id);
         topicRepository.delete(topic);
         return topic;
+    }
+
+    @Override
+    public List<Topic> sortTopicsBySerialNumber(List<Topic> topics) {
+        topics.sort(Comparator.comparing(Topic::getSerialNumber));
+        return topics;
     }
 }

@@ -37,7 +37,7 @@ public class TopicController {
     public String createTopic(@RequestParam TopicCategory categoryName,
                               @RequestParam String subCategoryName,
                               @RequestParam String description,
-                              @RequestParam Double serialNumber,
+                              @RequestParam String serialNumber,
                               @RequestParam Integer isAccepted,
                               @RequestParam String discussion,
                               @RequestParam String studentName,
@@ -51,7 +51,7 @@ public class TopicController {
             throw new RuntimeException(e);
         }
 
-        return "redirect:/nns-meetings";
+        return "redirect:/nns-meetings/" + nnsMeetingId + "/topics-list";
     }
 
 

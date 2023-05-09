@@ -22,9 +22,6 @@
         <td th:text="${nnsmeeting.date}"></td>
         <td th:text="${nnsmeeting.serialCode}"></td>
         <td>
-            <a th:href="@{'/nns-meetings/{id}/add-topic' (id=${nnsmeeting.id})}">[Add topic to this NNS Meeting]</a>
-        </td>
-        <td>
             <a th:href="@{'/nns-meetings/{id}/topics-list' (id=${nnsmeeting.id})}">[Show list of topics for this NNS Meetings]</a>
         </td>
     </tr>

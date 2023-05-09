@@ -8,24 +8,24 @@
 </head>
 <body>
 <h1>Topics List for selected NNS Meeting on date <span th:text="${nnsMeeting.date}"></span></h1>
+<a th:href="@{'/nns-meetings/{id}/add-topic' (id=${nnsMeeting.id})}">[Add topic to this NNS Meeting]</a>
+<br><br>
 <table>
     <tr>
-        <th>#</th>
+        <th>SerialNumber</th>
         <th>Category name</th>
         <th>Subcategory name</th>
         <th>Description</th>
-        <th>SerialNumber</th>
         <th>Is it accepted</th>
         <th>Discussion</th>
-        <th>NNSMeeting date</th>
         <th>Student name</th>
         <th>Student surname</th>
         <th>Professor name</th>
         <th>Professor surname</th>
         <th>Committee/Authors</th>
     </tr>
-    <tr th:each="topic, iterator : ${topics}">
-        <td th:text="${iterator.index+1 + '. '}"></td>
+    <tr th:each="topic : ${topics}">
+        <td th:text="${topic.serialNumber + '. '}"></td>
         <td>
             <input type="text" name="categoryName" th:value="${topic.categoryName}" disabled>
         </td>
@@ -36,16 +36,10 @@
             <input type="text" name="description" th:value="${topic.description}" disabled>
         </td>
         <td>
-            <input type="number" name="serialNumber" th:value="${topic.serialNumber}" disabled>
-        </td>
-        <td>
             <input type="text" name="isAccepted" th:value="${topic.isAccepted}" disabled>
         </td>
         <td>
             <input type="text" name="discussion" th:value="${topic.discussion}" disabled>
-        </td>
-        <td>
-            <input type="text" name="nnsMeetingDate" th:value="${topic.nnsMeeting.date}" disabled>
         </td>
         <td>
             <input type="text" name="studentName" th:value="${topic.student?.name}" disabled>
@@ -64,9 +58,6 @@
                 <option th:each="professor, iterator : ${topic.professors}" th:value="${professor.id}"
                         th:text="${iterator.index+1 + '. ' + professor.name + ' ' + professor.surname + ' ' + professor.professorRole}"></option>
             </select>
-            <!--        <ul>-->
-            <!--          <li th:each="professor : ${topic.professors}" th:text="${professor.name + ' ' + professor.surname + ' ' + professor.professorRole}"></li>-->
-            <!--        </ul>-->
         </td>
         <td>
             <input type="text" name="nnsMeetingId" th:value="${topic.nnsMeeting.id}" hidden="hidden">

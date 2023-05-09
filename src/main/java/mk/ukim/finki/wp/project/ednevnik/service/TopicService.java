@@ -14,7 +14,8 @@ import java.util.List;
 public interface TopicService {
     List<Topic> findAll();
     Topic findById(Long id);
-    Topic create(TopicCategory categoryName, String subCategoryName, String description, Double serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException;
-    Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, Double serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, Long studentId, Long professorId, List<Long> professorIds);
+    Topic create(TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException;
+    Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, Long studentId, Long professorId, List<Long> professorIds);
     Topic remove(Long id);
+    List<Topic> sortTopicsBySerialNumber(List<Topic> topics);
 }
