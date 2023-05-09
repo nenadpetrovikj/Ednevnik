@@ -21,7 +21,7 @@
             <th>Student name</th>
             <th>Student surname</th>
             <th>Professor</th>
-<!--        <th>Committee/Authors</th>-->
+            <th>Committee/Authors</th>
         </tr>
         <tr>
             <td>
@@ -58,6 +58,11 @@
                 <select name="professorId">
                     <option th:each="professor : ${professors}" th:value="${professor.id}"
                             th:text="${professor.name + ' ' + professor.surname}"></option>
+                </select>
+            </td>
+           <td>
+                <select name="professorsIds" multiple="multiple" size="5">
+                    <option th:each="professor : ${professors}" th:value="${professor.id}" th:text="${professor.name + ' ' + professor.surname}"></option>
                 </select>
             </td>
             <td>

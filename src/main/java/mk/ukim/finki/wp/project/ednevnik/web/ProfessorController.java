@@ -21,7 +21,7 @@ public class ProfessorController {
 
     @GetMapping
     public String showProfessorsList(Model model) {
-        List<Professor> professors = professorService.findAll();
+        List<Professor> professors = professorService.findAll().subList(1, professorService.findAll().size()); // to not include the first professor "/"
         model.addAttribute("professors", professors);
         return "professors-page";
     }
