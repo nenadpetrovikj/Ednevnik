@@ -28,6 +28,8 @@ public class ProfessorController {
 
     @GetMapping("/add")
     public String showProfessorAdd(Model model) {
+        String description = "Add professor";
+        model.addAttribute("description", description);
         model.addAttribute("professorRoles", ProfessorRole.values());
         return "professor-add";
     }
@@ -35,27 +37,22 @@ public class ProfessorController {
     @GetMapping("/{id}/edit")
     public String showProfessorEdit(@PathVariable Long id, Model model) {
         Professor professor = professorService.findById(id);
-        ProfessorRole selectedProfessorRole = professor.getProfessorRole();
+        String description = "Edit professor";
+        model.addAttribute("description", description);
         model.addAttribute(professor);
         model.addAttribute("professorRoles", ProfessorRole.values());
-        model.addAttribute("selectedProfessorRole", selectedProfessorRole);
-        return "professor-edit";
+        return "professor-add";
     }
 
     @PostMapping
-    public String professorAdd(@RequestParam String name,
+    public String professorAdd(@RequestParam(required = false) Long id,
+                               @RequestParam String name,
                                @RequestParam String surname,
                                @RequestParam ProfessorRole professorRole) {
-        professorService.create(name, surname, professorRole);
-        return "redirect:/professors";
-    }
-
-    @PostMapping("/{id}")
-    public String professorEdit(@PathVariable Long id,
-                                @RequestParam String name,
-                                @RequestParam String surname,
-                                @RequestParam ProfessorRole professorRole) {
-        professorService.update(id, name, surname, professorRole);
+        if (id != null)
+            professorService.update(id, name, surname, professorRole);
+        else
+            professorService.create(name, surname, professorRole);
         return "redirect:/professors";
     }
 }

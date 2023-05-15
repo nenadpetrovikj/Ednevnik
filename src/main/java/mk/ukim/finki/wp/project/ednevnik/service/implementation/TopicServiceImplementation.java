@@ -13,8 +13,6 @@ import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
 import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.springframework.stereotype.Service;
-
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -54,8 +52,25 @@ public class TopicServiceImplementation implements TopicService {
     }
 
     @Override
-    public Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, Long studentId, Long professorId, List<Long> professorIds) {
-        return null;
+    public Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException {
+        NNSMeeting nnsMeeting = nnsMeetingService.findById(nnsMeetingId);
+        Student student = studentService.create(studentName, studentSurname);
+        Professor professor = professorService.findById(professorId);
+        List<Professor> professors = professorRepository.findAllById(professorIds);
+        Topic topic = findById(id);
+
+        topic.setCategoryName(categoryName);
+        topic.setSubCategoryName(subCategoryName);
+        topic.setDescription(description);
+        topic.setSerialNumber(serialNumber);
+        topic.setIsAccepted(isAccepted);
+        topic.setDiscussion(discussion);
+        topic.setNnsMeeting(nnsMeeting);
+        topic.setStudent(student);
+        topic.setProfessor(professor);
+        topic.setProfessors(professors);
+
+        return topicRepository.save(topic);
     }
 
     @Override
@@ -63,11 +78,5 @@ public class TopicServiceImplementation implements TopicService {
         Topic topic = findById(id);
         topicRepository.delete(topic);
         return topic;
-    }
-
-    @Override
-    public List<Topic> sortTopicsBySerialNumber(List<Topic> topics) {
-        topics.sort(Comparator.comparing(Topic::getSerialNumber));
-        return topics;
     }
 }

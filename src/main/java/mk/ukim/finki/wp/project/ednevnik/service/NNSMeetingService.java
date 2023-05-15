@@ -1,6 +1,7 @@
 package mk.ukim.finki.wp.project.ednevnik.service;
 
 import mk.ukim.finki.wp.project.ednevnik.model.NNSMeeting;
+import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,4 +16,6 @@ public interface NNSMeetingService {
     NNSMeeting update(Long id, String serialCode, LocalDate date);
 
     NNSMeeting remove(Long id);
+
+    List<Topic> sortTopicsBySerialNumberForNNSMeeting(Long id);
 }

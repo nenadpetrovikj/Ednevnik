@@ -1,11 +1,13 @@
 package mk.ukim.finki.wp.project.ednevnik.service.implementation;
 
 import mk.ukim.finki.wp.project.ednevnik.model.NNSMeeting;
+import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 import mk.ukim.finki.wp.project.ednevnik.repository.NNSMeetingRepository;
 import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -45,5 +47,14 @@ public class NNSMeetingServiceImplementation implements NNSMeetingService {
         NNSMeeting nnsMeeting = findById(id);
         nnsMeetingRepository.delete(nnsMeeting);
         return nnsMeeting;
+    }
+
+    @Override
+    public List<Topic> sortTopicsBySerialNumberForNNSMeeting(Long id) {
+        NNSMeeting nnsMeeting = findById(id);
+
+        List<Topic> topics = nnsMeeting.getTopics();
+        topics.sort(Comparator.comparing(Topic::getSerialNumber));
+        return topics;
     }
 }

@@ -52,17 +52,34 @@ public class NNSMeetingController {
     public String showAddTopicsPage(Model model, @PathVariable Long id) {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(id);
         List<Professor> professors = professorService.findAll();
+        String description = "Add a topic";
+
+        model.addAttribute("description", description);
         model.addAttribute("nnsMeeting", nnsMeeting);
         model.addAttribute("professors", professors);
         model.addAttribute("topicCategories", TopicCategory.values());
         return "add-topic-page";
     }
 
+    @GetMapping("/{id}/edit-topic")
+    public String getEditTopicPage(Model model, @PathVariable Long id) {
+        NNSMeeting nnsMeeting = nnsMeetingService.findById(id);
+        List<Professor> professors = professorService.findAll();
+        Topic topic = topicService.findById(id);
+        String description = "Edit a topic";
+
+        model.addAttribute("description", description);
+        model.addAttribute("nnsMeeting", nnsMeeting);
+        model.addAttribute("professors", professors);
+        model.addAttribute("topicCategories", TopicCategory.values());
+        model.addAttribute("topic", topic);
+        return "add-topic-page";
+    }
+
     @GetMapping("/{id}/topics-list")
     public String showListTopicsPage(Model model, @PathVariable Long id) {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(id);
-        List<Topic> topics = nnsMeeting.getTopics();
-        topics = topicService.sortTopicsBySerialNumber(topics);
+        List<Topic> topics = nnsMeetingService.sortTopicsBySerialNumberForNNSMeeting(id);
         model.addAttribute("nnsMeeting", nnsMeeting);
         model.addAttribute("topics", topics);
         return "list-topics";

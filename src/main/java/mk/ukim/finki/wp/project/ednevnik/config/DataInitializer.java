@@ -4,7 +4,6 @@ import mk.ukim.finki.wp.project.ednevnik.model.Professor;
 import mk.ukim.finki.wp.project.ednevnik.model.Student;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.ProfessorRole;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
-import mk.ukim.finki.wp.project.ednevnik.model.exceptions.InvalidIdException;
 import mk.ukim.finki.wp.project.ednevnik.model.exceptions.NameOrSurnameFieldIsEmptyException;
 import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
 import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
@@ -49,7 +48,7 @@ public class DataInitializer {
     }
 
     @PostConstruct
-    public void initData() throws InvalidIdException, NameOrSurnameFieldIsEmptyException {
+    public void initData() throws NameOrSurnameFieldIsEmptyException {
         for (long i = 1; i < 4; i++) {
             nnsMeetingService.create("meetingCode " + i, LocalDate.now().minusDays(i));
         }

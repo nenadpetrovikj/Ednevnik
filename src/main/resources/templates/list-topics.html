@@ -60,7 +60,10 @@
             </select>
         </td>
         <td>
-            <input type="text" name="nnsMeetingId" th:value="${topic.nnsMeeting.id}" hidden="hidden">
+            <input type="text" name="nnsMeetingId" th:value="${topic.nnsMeeting.id}" hidden="hidden"> <!-- why is this needed? -->
+        </td>
+        <td>
+            <a th:href="@{'/nns-meetings/{id}/edit-topic' (id=${nnsMeeting.id})}">Edit Topic</a>
         </td>
     </tr>
 </table>

@@ -2,31 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add a student</title>
+    <title th:text="${description}"></title>
     <link rel="stylesheet" href="../static/css/bootstrap.min.css">
     <script src="../static/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <h1>Add a new student</h1>
-    <form method="post" action="/students">
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Surname</th>
-            </tr>
-            <tr>
-                <td>
-                    <input type="text" name="name">
-                </td>
-                <td>
-                    <input type="text" name="surname">
-                </td>
-                <td>
-                    <button type="submit">Add student</button>
-                </td>
-            </tr>
-        </table>
-    </form>
-    <a href="/students">[Back]</a>
+<h1 th:text="${description}"></h1>
+<form method="post" action="/students">
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Surname</th>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="name" th:value="${student?.name}">
+            </td>
+            <td>
+                <input type="text" name="surname" th:value="${student?.surname}">
+            </td>
+            <td>
+                <input type="number" name="id" th:value="${student?.id}" hidden="hidden">
+            </td>
+            <td>
+                <button type="submit" th:text="${description}"></button>
+            </td>
+        </tr>
+    </table>
+</form>
+<a href="/students">[Back]</a>
 </body>
 </html>

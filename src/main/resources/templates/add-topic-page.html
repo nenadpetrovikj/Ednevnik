@@ -7,7 +7,7 @@
     <script src="../static/js/bootstrap.min.js"></script>
 </head>
 <body>
-<h1>Add a topic for this NNS Meeting of date: <span th:text="${nnsMeeting.date}"></span></h1>
+<h1 th:block="${description}"></h1>
 
 <form method="post" action="/topics">
     <table>
@@ -25,48 +25,54 @@
         </tr>
         <tr>
             <td>
-                <input type="text" name="serialNumber">
+                <input type="text" name="serialNumber" th:value="${topic?.serialNumber}">
             </td>
             <td>
                 <select name="categoryName">
                     <option th:each="category : ${topicCategories}" th:value="${category}"
-                            th:text="${category}"></option>
+                            th:text="${category}"
+                            th:selected="${topic?.categoryName == category}"></option>
                 </select>
             </td>
             <td>
-                <input type="text" name="subCategoryName">
+                <input type="text" name="subCategoryName" th:value="${topic?.subCategoryName}">
             </td>
             <td>
-                <input type="text" name="description">
+                <input type="text" name="description" th:value="${topic?.description}">
             </td>
             <td>
                 <select name="isAccepted">
-                    <option value="0">False</option>
-                    <option value="1">True</option>
+                    <option value="0" th:selected="${topic?.isAccepted == false}">False</option>
+                    <option value="1" th:selected="${topic?.isAccepted}">True</option>
                 </select>
             </td>
             <td>
-                <input type="text" name="discussion">
+                <input type="text" name="discussion" th:value="${topic?.discussion}">
             </td>
             <td>
-                <input type="text" name="studentName">
+                <input type="text" name="studentName" th:value="${topic?.student?.name}">
             </td>
             <td>
-                <input type="text" name="studentSurname">
+                <input type="text" name="studentSurname" th:value="${topic?.student?.surname}">
             </td>
             <td>
                 <select name="professorId">
                     <option th:each="professor : ${professors}" th:value="${professor.id}"
-                            th:text="${professor.name + ' ' + professor.surname}"></option>
-                </select>
-            </td>
-           <td>
-                <select name="professorsIds" multiple="multiple" size="5">
-                    <option th:each="professor : ${professors}" th:value="${professor.id}" th:text="${professor.name + ' ' + professor.surname}"></option>
+                            th:text="${professor.name + ' ' + professor.surname}"
+                            th:selected="${topic?.professor?.id == professor.id}"></option>
                 </select>
             </td>
             <td>
-                <input type="number" name="nnsMeetingId" th:value="${nnsMeeting.id}" hidden="hidden"> <!-- th:field="*{id}" th:value="${param.id}" -->
+                <select name="professorsIds" multiple="multiple" size="5">
+                    <option th:each="professor : ${professors}" th:value="${professor.id}"
+                            th:text="${professor.name + ' ' + professor.surname}"
+                            th:selected="${topic?.professors?.contains(professor)}"></option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="nnsMeetingId" th:value="${nnsMeeting.id}" hidden="hidden">
+                <input type="number" name="id" th:value="${topic?.id}" hidden="hidden">
+                <!-- th:field="*{id}" th:value="${param.id}" -->
             </td>
             <td>
                 <button type="submit">Add topic</button>
