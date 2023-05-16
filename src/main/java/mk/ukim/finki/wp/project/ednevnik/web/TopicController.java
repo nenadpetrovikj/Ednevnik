@@ -39,18 +39,13 @@ public class TopicController {
                               @RequestParam Long professorId,
                               @RequestParam Long nnsMeetingId,
                               @RequestParam List<Long> professorsIds) {
-        if (id != null) {
-            try {
+        try {
+            if (id != null)
                 topicService.update(id, categoryName, subCategoryName, description, serialNumber, isAccepted == 1, discussion, nnsMeetingId, studentName, studentSurname, professorId, professorsIds);
-            } catch (NameOrSurnameFieldIsEmptyException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
+            else
                 topicService.create(categoryName, subCategoryName, description, serialNumber, isAccepted == 1, discussion, nnsMeetingId, studentName, studentSurname, professorId, professorsIds);
-            } catch (NameOrSurnameFieldIsEmptyException e) {
-                throw new RuntimeException(e);
-            }
+        } catch (NameOrSurnameFieldIsEmptyException e) {
+            throw new RuntimeException(e);
         }
 
         return "redirect:/nns-meetings/" + nnsMeetingId + "/topics-list";

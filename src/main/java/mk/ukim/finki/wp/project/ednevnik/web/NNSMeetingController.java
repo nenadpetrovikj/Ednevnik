@@ -61,11 +61,11 @@ public class NNSMeetingController {
         return "add-topic-page";
     }
 
-    @GetMapping("/{id}/edit-topic")
-    public String getEditTopicPage(Model model, @PathVariable Long id) {
+    @GetMapping("/{id}/edit-topic/{topicId}")
+    public String getEditTopicPage(Model model, @PathVariable Long id, @PathVariable Long topicId) {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(id);
         List<Professor> professors = professorService.findAll();
-        Topic topic = topicService.findById(id);
+        Topic topic = topicService.findById(topicId);
         String description = "Edit a topic";
 
         model.addAttribute("description", description);
