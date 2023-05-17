@@ -13,6 +13,8 @@ import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
 import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -78,5 +80,34 @@ public class TopicServiceImplementation implements TopicService {
         Topic topic = findById(id);
         topicRepository.delete(topic);
         return topic;
+    }
+
+    @Override
+    public List<Topic> findBySelectedFields(Long nnsMeetingId, String categoryName, String studentNameAndSurname, String professorNameAndSurname) {
+        List<Topic> topicsResultList = findAll();
+
+        // todo: search by description - if(topic.getDescription().contains(text))...
+        // todo: students and profs should be searchable with autocomplete
+        // todo: search by subcategory, searchable with autocomplete
+        // todo: search by prof in committee
+
+        if (nnsMeetingId != 0) {
+            topicsResultList = topicsResultList.stream()
+                    .filter(topic -> topic.getNnsMeeting().getId().equals(nnsMeetingId)).toList();
+        }
+        if (!categoryName.equals("all")) {
+            topicsResultList = topicsResultList.stream()
+                    .filter(topic -> topic.getCategoryName().toString().equals(categoryName)).toList();
+        }
+        if (!studentNameAndSurname.equals("all")) {
+            topicsResultList = topicsResultList.stream()
+                    .filter(topic -> topic.getStudent().getName().equals(studentNameAndSurname.split(" ")[0]) && topic.getStudent().getSurname().equals(studentNameAndSurname.split(" ")[1])).toList();
+        }
+        if (!professorNameAndSurname.equals("all")) {
+            topicsResultList = topicsResultList.stream()
+                    .filter(topic -> topic.getProfessor().getName().equals(professorNameAndSurname.split(" ")[0]) && topic.getProfessor().getSurname().equals(professorNameAndSurname.split(" ")[1])).toList();
+        }
+
+        return topicsResultList;
     }
 }

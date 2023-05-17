@@ -4,6 +4,7 @@ import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
 import mk.ukim.finki.wp.project.ednevnik.model.exceptions.NameOrSurnameFieldIsEmptyException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TopicService {
@@ -16,4 +17,6 @@ public interface TopicService {
     Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException;
 
     Topic remove(Long id);
+
+    List<Topic> findBySelectedFields(Long nnsMeetingId, String categoryName, String studentNameAndSurname, String professorNameAndSurname);
 }

@@ -54,7 +54,7 @@
             <input type="text" name="professorSurname" th:value="${topic.professor?.surname}" disabled>
         </td>
         <td>
-            <select multiple size="3" name="=professors">
+            <select multiple size="3" name="professors">
                 <option th:each="professor, iterator : ${topic.professors}" th:value="${professor.id}"
                         th:text="${iterator.index+1 + '. ' + professor.name + ' ' + professor.surname + ' ' + professor.professorRole}"></option>
             </select>
@@ -65,5 +65,6 @@
     </tr>
 </table>
 <a href="/nns-meetings">[Back]</a>
+<a href="/home">[Home/Filter]</a>
 </body>
 </html>

@@ -55,9 +55,9 @@ public class DataInitializer {
         professorService.create("/", "/", null);
         List<Long> professorIds = new ArrayList<>();
         for (long i = 1; i < 7; i++) {
-            Professor professor = professorService.create("Prof.name " + i, "Prof. surname " + i, randomizeProfRole(i));
+            Professor professor = professorService.create("Prof.name" + i, "Prof.surname" + i, randomizeProfRole(i));
             professorIds.add(professor.getId());
-            Student student = studentService.create("Stud.name " + i, "Stud. surname " + i);
+            Student student = studentService.create("Stud.name" + i, "Stud.surname" + i);
             topicService.create(TopicCategory.values()[(int) (i % 4)], "Subcategory " + i, "Description " + i, i + "", true, "Discussion " + i, randomizeNNSMeeting(i), student.getName(), student.getSurname(), professor.getId(), professorIds);
         }
 
