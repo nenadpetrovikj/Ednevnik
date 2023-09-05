@@ -1,12 +1,18 @@
 package mk.ukim.finki.wp.project.ednevnik.service.implementation;
 
+import mk.ukim.finki.wp.project.ednevnik.model.Professor;
 import mk.ukim.finki.wp.project.ednevnik.model.Student;
-import mk.ukim.finki.wp.project.ednevnik.model.exceptions.NameOrSurnameFieldIsEmptyException;
+import mk.ukim.finki.wp.project.ednevnik.model.Topic;
+import mk.ukim.finki.wp.project.ednevnik.model.exceptions.StudentFormatException;
 import mk.ukim.finki.wp.project.ednevnik.repository.StudentRepository;
 import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StudentServiceImplementation implements StudentService {
@@ -24,27 +30,69 @@ public class StudentServiceImplementation implements StudentService {
 
     @Override
     public Student findById(Long id) {
-        return studentRepository.findById(id).get();
+        return studentRepository.findById(id).orElseGet(() -> null);
     }
 
     @Override
-    public Student create(String name, String surname) throws NameOrSurnameFieldIsEmptyException {
-        name = name.trim();
-        surname = surname.trim();
+    public List<String> getAllStudentsInFormat() {
+        return findAll().stream().map(student -> student.getName() + ' ' + student.getSurname() + ' ' + student.getId()).toList();
+    }
 
-        if (name.isEmpty() && surname.isEmpty()) return null;
+    @Override
+    public Student checkFormatAndReturnStudent(String studentFullNameId) throws StudentFormatException {
+        List<String> split = Arrays.stream(studentFullNameId.trim().split(" ")).map(String::trim).toList();
+        if (split.size() != 3) throw new StudentFormatException();
+        Student student = studentRepository.findById(Long.parseLong(split.get(2))).orElse(null);
 
-        if (name.isEmpty() || surname.isEmpty()) throw new NameOrSurnameFieldIsEmptyException();
+        // user can enter name surname and write the wrong id. If that's the case then some kind of an exception must be thrown
+        if (student != null && student.getName().equals(split.get(0)) && student.getSurname().equals(split.get(1)))
+            return student;
+        return null;
+    }
 
-        Student student = studentRepository.findByNameAndSurname(name, surname);
+    @Override
+    public List<Topic> topicsForThisStudentSortedByTheirNNSMeetingDate(Student student) {
+        return student.getTopics().stream()
+                .sorted(Comparator.<Topic, LocalDate>comparing(topic -> topic.getNnsMeeting().getDate()).reversed()).toList();
+    }
+
+    @Override
+    public List<Topic> topicsForThisStudentFilteredBySpecs(Student student, String categoryName, String subCategoryName, Long professorId) {
+        List<Topic> topics = topicsForThisStudentSortedByTheirNNSMeetingDate(student);
+
+        if (!categoryName.equalsIgnoreCase("сите"))
+            topics = topics.stream().filter(topic -> topic.getCategoryName().name().equals(categoryName)).toList();
+        if (!subCategoryName.isEmpty())
+            topics = topics.stream().filter(topic -> topic.getSubCategoryName().equals(subCategoryName)).toList();
+        if (professorId != -1)
+            topics = topics.stream().filter(topic -> {
+                if (Objects.equals(topic.getProfessor().getId(), professorId)) return true;
+                return topic.getProfessors().stream().map(Professor::getId).toList().contains(professorId);
+            }).toList();
+        return topics;
+    }
+
+    @Override
+    public Student create(String studentFullNameId) throws StudentFormatException {
+        if (studentFullNameId.isEmpty()) return null;
+
+        List<String> split = Arrays.stream(studentFullNameId.trim().split(" ")).map(String::trim).toList();
+
+        Student student = checkFormatAndReturnStudent(studentFullNameId);
         if (student != null) return student;
 
-        return studentRepository.save(new Student(name, surname));
+        return studentRepository.save(new Student(split.get(0), split.get(1), Long.parseLong(split.get(2))));
     }
 
     @Override
-    public Student update(Long id, String name, String surname) {
-        Student student = findById(id);
+    public Student update(Long idOld, Long idNew, String name, String surname) {
+        Student student = findById(idOld);
+
+        if (findById(idNew) == null) {
+            Student newStudent = new Student(name, surname, idNew);
+            remove(idOld);
+            return studentRepository.save(newStudent);
+        }
 
         student.setName(name);
         student.setSurname(surname);
@@ -55,6 +103,9 @@ public class StudentServiceImplementation implements StudentService {
     @Override
     public Student remove(Long id) {
         Student student = findById(id);
+        List<Topic> topics = student.getTopics();
+        for (Topic topic : topics) topic.setStudent(null);
+
         studentRepository.delete(student);
         return student;
     }

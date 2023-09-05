@@ -5,7 +5,7 @@ import mk.ukim.finki.wp.project.ednevnik.model.Professor;
 import mk.ukim.finki.wp.project.ednevnik.model.Student;
 import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
-import mk.ukim.finki.wp.project.ednevnik.model.exceptions.NameOrSurnameFieldIsEmptyException;
+import mk.ukim.finki.wp.project.ednevnik.model.exceptions.StudentFormatException;
 import mk.ukim.finki.wp.project.ednevnik.repository.ProfessorRepository;
 import mk.ukim.finki.wp.project.ednevnik.repository.TopicRepository;
 import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
@@ -14,8 +14,9 @@ import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TopicServiceImplementation implements TopicService {
@@ -41,24 +42,32 @@ public class TopicServiceImplementation implements TopicService {
 
     @Override
     public Topic findById(Long id) {
-        return topicRepository.findById(id).get();
+        return topicRepository.findById(id).orElseGet(() -> null);
     }
 
     @Override
-    public Topic create(TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException {
+    public Topic create(TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentFullNameId, Long professorId, List<Long> professorIds) throws StudentFormatException {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(nnsMeetingId);
-        Student student = studentService.create(studentName, studentSurname);
+        Student student = studentService.create(studentFullNameId);
         Professor professor = professorService.findById(professorId);
-        List<Professor> professors = professorRepository.findAllById(professorIds);
+
+        List<Professor> professors = null;
+        if (professorIds != null && !professorIds.contains(-1))
+            professors = professorRepository.findAllById(professorIds);
+
         return topicRepository.save(new Topic(categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeeting, student, professor, professors));
     }
 
     @Override
-    public Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentName, String studentSurname, Long professorId, List<Long> professorIds) throws NameOrSurnameFieldIsEmptyException {
+    public Topic update(Long id, TopicCategory categoryName, String subCategoryName, String description, String serialNumber, Boolean isAccepted, String discussion, Long nnsMeetingId, String studentFullNameId, Long professorId, List<Long> professorIds) throws StudentFormatException {
         NNSMeeting nnsMeeting = nnsMeetingService.findById(nnsMeetingId);
-        Student student = studentService.create(studentName, studentSurname);
+        Student student = studentService.create(studentFullNameId);
         Professor professor = professorService.findById(professorId);
-        List<Professor> professors = professorRepository.findAllById(professorIds);
+
+        List<Professor> professors = null;
+        if (professorIds != null && !professorIds.contains(-1))
+            professors = professorRepository.findAllById(professorIds);
+
         Topic topic = findById(id);
 
         topic.setCategoryName(categoryName);
@@ -83,31 +92,7 @@ public class TopicServiceImplementation implements TopicService {
     }
 
     @Override
-    public List<Topic> findBySelectedFields(Long nnsMeetingId, String categoryName, String studentNameAndSurname, String professorNameAndSurname) {
-        List<Topic> topicsResultList = findAll();
-
-        // todo: search by description - if(topic.getDescription().contains(text))...
-        // todo: students and profs should be searchable with autocomplete
-        // todo: search by subcategory, searchable with autocomplete
-        // todo: search by prof in committee
-
-        if (nnsMeetingId != 0) {
-            topicsResultList = topicsResultList.stream()
-                    .filter(topic -> topic.getNnsMeeting().getId().equals(nnsMeetingId)).toList();
-        }
-        if (!categoryName.equals("all")) {
-            topicsResultList = topicsResultList.stream()
-                    .filter(topic -> topic.getCategoryName().toString().equals(categoryName)).toList();
-        }
-        if (!studentNameAndSurname.equals("all")) {
-            topicsResultList = topicsResultList.stream()
-                    .filter(topic -> topic.getStudent().getName().equals(studentNameAndSurname.split(" ")[0]) && topic.getStudent().getSurname().equals(studentNameAndSurname.split(" ")[1])).toList();
-        }
-        if (!professorNameAndSurname.equals("all")) {
-            topicsResultList = topicsResultList.stream()
-                    .filter(topic -> topic.getProfessor().getName().equals(professorNameAndSurname.split(" ")[0]) && topic.getProfessor().getSurname().equals(professorNameAndSurname.split(" ")[1])).toList();
-        }
-
-        return topicsResultList;
+    public Set<String> getAllSubCategories() {
+        return findAll().stream().map(Topic::getSubCategoryName).filter(subCategory -> !subCategory.isEmpty()).collect(Collectors.toSet());
     }
 }

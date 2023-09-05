@@ -1,70 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Topics List for selected NNS Meeting</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <script src="../static/js/bootstrap.min.js"></script>
-</head>
-<body>
-<h1>Topics List for selected NNS Meeting on date <span th:text="${nnsMeeting.date}"></span></h1>
-<a th:href="@{'/nns-meetings/{id}/add-topic' (id=${nnsMeeting.id})}">[Add topic to this NNS Meeting]</a>
-<br><br>
-<table>
-    <tr>
-        <th>SerialNumber</th>
-        <th>Category name</th>
-        <th>Subcategory name</th>
-        <th>Description</th>
-        <th>Is it accepted</th>
-        <th>Discussion</th>
-        <th>Student name</th>
-        <th>Student surname</th>
-        <th>Professor name</th>
-        <th>Professor surname</th>
-        <th>Committee/Authors</th>
-    </tr>
-    <tr th:each="topic : ${topics}">
-        <td th:text="${topic.serialNumber + '. '}"></td>
-        <td>
-            <input type="text" name="categoryName" th:value="${topic.categoryName}" disabled>
-        </td>
-        <td>
-            <input type="text" name="subCategoryName" th:value="${topic.subCategoryName}" disabled>
-        </td>
-        <td>
-            <input type="text" name="description" th:value="${topic.description}" disabled>
-        </td>
-        <td>
-            <input type="text" name="isAccepted" th:value="${topic.isAccepted}" disabled>
-        </td>
-        <td>
-            <input type="text" name="discussion" th:value="${topic.discussion}" disabled>
-        </td>
-        <td>
-            <input type="text" name="studentName" th:value="${topic.student?.name}" disabled>
-        </td>
-        <td>
-            <input type="text" name="studentSurname" th:value="${topic.student?.surname}" disabled>
-        </td>
-        <td>
-            <input type="text" name="professorName" th:value="${topic.professor?.name}" disabled>
-        </td>
-        <td>
-            <input type="text" name="professorSurname" th:value="${topic.professor?.surname}" disabled>
-        </td>
-        <td>
-            <select multiple size="3" name="professors">
-                <option th:each="professor, iterator : ${topic.professors}" th:value="${professor.id}"
-                        th:text="${iterator.index+1 + '. ' + professor.name + ' ' + professor.surname + ' ' + professor.professorRole}"></option>
-            </select>
-        </td>
-        <td>
-            <a th:href="@{'/nns-meetings/{id}/edit-topic/{topicId}' (id=${nnsMeeting.id}, topicId=${topic.id})}">Edit Topic</a>
-        </td>
-    </tr>
-</table>
-<a href="/nns-meetings">[Back]</a>
-<a href="/home">[Home/Filter]</a>
-</body>
-</html>
+<th:block>
+    <div class="container my-4 py-4">
+        <div class="row align-items-center">
+            <div class="col-10">
+                <h1 class="fs-2 my-4">Преглед На Седница</h1>
+                <p class="text-muted m-0">Сериски код: <span th:text="${nnsMeeting.serialCode}"></span></p>
+                <p class="text-muted">Одржана на датум: <span th:text="${nnsMeeting.date}"></span></p>
+            </div>
+            <div class="col-2">
+                <a th:href="@{'/nns-meetings/{id}/add-topic' (id=${nnsMeeting.id})}" class="btn btn-outline-danger w-100">Додади нов запис</a>
+            </div>
+        </div>
+        <div class="my-4 py-4">
+            <div th:each="topic : ${topics}" class="row align-items-center">
+                <h2 class="fs-3 my-4 col-10"
+                    th:if="${@stringUtility.countOccurrences(topic.serialNumber, '.') == 0}"
+                    th:text="${topic.serialNumber + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + #strings.capitalizeWords(#strings.replace(#strings.toLowerCase(topic.categoryName), '_', ' '))}"
+                ></h2>
+                <h3 class="fs-4 my-3 col-10"
+                    th:if="${@stringUtility.countOccurrences(topic.serialNumber, '.') == 1}"
+                    th:text="${topic.serialNumber + '&nbsp;&nbsp;&nbsp;&nbsp;' + topic.subCategoryName}"
+                ></h3>
+                <p class="col-10 my-2" th:unless="${@stringUtility.countOccurrences(topic.serialNumber, '.') == 0 or @stringUtility.countOccurrences(topic.serialNumber, '.') == 1}"
+                   th:text="${topic.serialNumber + '&nbsp;&nbsp;&nbsp;&nbsp;' + topic.description}"
+                   style="white-space: pre-line;"></p>
+                <div class="col-2 d-flex justify-content-end">
+                    <a th:href="@{'/nns-meetings/{id}/edit-topic/{topicId}' (id=${nnsMeeting.id}, topicId=${topic.id})}" class="me-4"><i class="fa-regular fa-pen-to-square text-muted align-top"></i></a>
+                    <a th:href="@{'/topics/{id}/delete' (id=${topic.id})}"><i class="fa-solid fa-trash text-danger align-top"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="my-4 py-3"></div>
+    </div>
+</th:block>

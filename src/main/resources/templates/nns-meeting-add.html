@@ -1,31 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add a NNS Meeting</title>
-</head>
-<body>
-<h1>Add a new NNS Meeting</h1>
-<form method="post" action="/nns-meetings">
-    <table>
-        <tr>
-            <th>Serial Code</th>
-            <th>Date</th>
-        </tr>
-        <tr>
-            <td>
-                <input type="text" name="serialCode">
-            </td>
-            <td>
-                <input type="date" name="date">
-            </td>
-            <td>
-                <button type="submit">Add NNS Meeting</button>
-            </td>
-        </tr>
-    </table>
-</form>
-<a href="/nns-meetings">[Back]</a>
-
-</body>
-</html>
+<th:block>
+    <div class="container my-4 py-4">
+        <h1 class="fs-2 pt-4">Додадете Нова ННС Седница</h1>
+        <p class="text-muted">Додадете нова седница брзо и едноставно</p>
+        <div class="my-4 py-4">
+            <form method="post" action="/nns-meetings/add">
+                <div class="mb-4">
+                    <label for="serialCode" class="mb-2">Сериски број</label>
+                    <input type="text" name="serialCode" id="serialCode" class="form-control">
+                </div>
+                <div class="mb-4">
+                    <label for="date" class="mb-2">Датум на кој е одржана седницата</label>
+                    <input type="date" name="date" id="date" class="form-control">
+                </div>
+                <button class="btn btn-outline-primary my-4 w-25">Додади</button>
+            </form>
+        </div>
+    </div>
+</th:block>

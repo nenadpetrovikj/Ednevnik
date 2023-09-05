@@ -1,85 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${description}"></title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <script src="../static/js/bootstrap.min.js"></script>
-</head>
-<body>
-<h1 th:text="${description}"></h1>
-
-<form method="post" action="/topics">
-    <table>
-        <tr>
-            <th>SerialNumber</th>
-            <th>Category name</th>
-            <th>Subcategory name</th>
-            <th>Description</th>
-            <th>Is it accepted</th>
-            <th>Discussion</th>
-            <th>Student name</th>
-            <th>Student surname</th>
-            <th>Professor</th>
-            <th>Committee/Authors</th>
-        </tr>
-        <tr>
-            <td>
-                <input type="text" name="serialNumber" th:value="${topic?.serialNumber}">
-            </td>
-            <td>
-                <select name="categoryName">
-                    <option th:each="category : ${topicCategories}" th:value="${category}"
-                            th:text="${category}"
-                            th:selected="${topic?.categoryName == category}"></option>
-                </select>
-            </td>
-            <td>
-                <input type="text" name="subCategoryName" th:value="${topic?.subCategoryName}">
-            </td>
-            <td>
-                <input type="text" name="description" th:value="${topic?.description}">
-            </td>
-            <td>
-                <select name="isAccepted">
-                    <option value="0" th:selected="${topic?.isAccepted == false}">False</option>
-                    <option value="1" th:selected="${topic?.isAccepted}">True</option>
-                </select>
-            </td>
-            <td>
-                <input type="text" name="discussion" th:value="${topic?.discussion}">
-            </td>
-            <td>
-                <input type="text" name="studentName" th:value="${topic?.student?.name}">
-            </td>
-            <td>
-                <input type="text" name="studentSurname" th:value="${topic?.student?.surname}">
-            </td>
-            <td>
-                <select name="professorId">
-                    <option th:each="professor : ${professors}" th:value="${professor.id}"
-                            th:text="${professor.name + ' ' + professor.surname}"
-                            th:selected="${topic?.professor?.id == professor.id}"></option>
-                </select>
-            </td>
-            <td>
-                <select name="professorsIds" multiple="multiple" size="5">
-                    <option th:each="professor : ${professors}" th:value="${professor.id}"
-                            th:text="${professor.name + ' ' + professor.surname}"
-                            th:selected="${topic?.professors?.contains(professor)}"></option>
-                </select>
-            </td>
-            <td>
+<th:block>
+    <div class="container my-4 py-4">
+        <div th:if="${topic == null}">
+            <h1 class="fs-2 pt-4">Додадете Нов Запис</h1>
+            <p class="text-muted m-0">Сериски број на седницата за која додавате запис: <span
+                    th:text="${nnsMeeting.serialCode}"></span></p>
+        </div>
+        <div th:unless="${topic == null}">
+            <h1 class="fs-2 pt-4">Сменете Го Записот</h1>
+            <p class="text-muted m-0">Сериски број на седницата на која припаѓа записот: <span
+                    th:text="${nnsMeeting.serialCode}"></span></p>
+        </div>
+        <p class="text-muted">Датум на кој била одржана седницата: <span th:text="${nnsMeeting.date}"></span></p>
+        <div class="my-4 py-4">
+            <form autocomplete="off" method="post" action="/topics">
+                <div class="mb-4">
+                    <label for="serialNumber" class="mb-2">Сериски број</label>
+                    <input th:value="${topic?.serialNumber}" type="text" name="serialNumber" id="serialNumber"
+                           class="form-control">
+                </div>
+                <div class="mb-4">
+                    <label for="categoryName" class="mb-2">Категорија</label>
+                    <select name="categoryName" id="categoryName" class="form-select">
+                        <option th:each="category : ${topicCategories}" th:value="${category}"
+                                th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(category), '_', ' '))}"
+                                th:selected="${topic?.categoryName == category}"></option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="subCategoryName" class="mb-2">Подкатегорија</label>
+                    <input th:value="${topic?.subCategoryName}" type="text" name="subCategoryName" id="subCategoryName"
+                           class="form-control">
+                </div>
+                <div class="mb-4">
+                    <label for="description" class="mb-2">Опис</label>
+                    <textarea th:value="${topic?.description}" th:text="${topic?.description}" type="text" name="description" id="description"
+                              class="form-control" style="height: 150px"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="studentFullNameId">Студент</label>
+                    <p class="text-muted mb-2">Одвоени со празно место, внесете име, презиме и индекс</p>
+                    <input th:value="${student}"
+                           type="text"
+                           name="studentFullNameId" id="studentFullNameId" class="form-control">
+                </div>
+                <div class="mb-4">
+                    <label for="professorId" class="mb-2">Професор</label>
+                    <select name="professorId" id="professorId" class="form-select">
+                        <option th:value="-1">никој</option>
+                        <option th:each="professor : ${professors}" th:value="${professor.id}"
+                                th:text="${professor.name + ' ' + professor.surname}"
+                                th:selected="${topic?.professor?.id == professor.id}"></option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="professorsIds" class="mb-2">Професори</label>
+                    <select name="professorsIds" id="professorsIds" class="form-select" multiple="multiple" size="5">
+                        <option th:value="-1">никој</option>
+                        <option th:each="professor : ${professors}" th:value="${professor.id}"
+                                th:text="${professor.name + ' ' + professor.surname}"
+                                th:selected="${topic?.professors?.contains(professor)}"></option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="discussion" class="mb-2">Дискусија</label>
+                    <textarea th:value="${topic?.discussion}" th:text="${topic?.discussion}" type="text" name="discussion" id="discussion"
+                              class="form-control" style="height: 150px"></textarea>
+                </div>
+                <div class="mb-4 form-check">
+                    <label for="isAccepted" class="mb-2">Дали е прифатен?</label>
+                    <input th:checked="${topic?.isAccepted}" type="checkbox" name="isAccepted" id="isAccepted"
+                           class="form-check-input">
+                </div>
                 <input type="number" name="nnsMeetingId" th:value="${nnsMeeting.id}" hidden="hidden">
                 <input type="number" name="id" th:value="${topic?.id}" hidden="hidden">
-                <!-- th:field="*{id}" th:value="${param.id}" -->
-            </td>
-            <td>
-                <button type="submit" th:text="${description}"></button>
-            </td>
-        </tr>
-    </table>
-</form>
-<a th:href="@{'/nns-meetings/{id}/topics-list' (id=${nnsMeeting.id})}">[Back]</a>
-</body>
-</html>
+
+                <button th:if="${topic == null}" class="btn btn-outline-primary my-4 w-25">Додади</button>
+                <button th:unless="${topic == null}" class="btn btn-outline-primary my-4 w-25">Промени</button>
+            </form>
+        </div>
+    </div>
+</th:block>

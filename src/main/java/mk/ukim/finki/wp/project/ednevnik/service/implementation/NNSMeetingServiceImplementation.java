@@ -25,8 +25,18 @@ public class NNSMeetingServiceImplementation implements NNSMeetingService {
     }
 
     @Override
+    public List<NNSMeeting> findAllHeldBeforeSelectedDateDesc(LocalDate date) {
+        List<NNSMeeting> filteredList = findAllSortedByDateDesc();
+
+        filteredList = filteredList.stream()
+                .filter(nnsMeeting -> nnsMeeting.getDate().isBefore(date) || nnsMeeting.getDate().isEqual(date)).toList();
+
+        return filteredList;
+    }
+
+    @Override
     public NNSMeeting findById(Long id) {
-        return nnsMeetingRepository.findById(id).get();
+        return nnsMeetingRepository.findById(id).orElseGet(() -> null);
     }
 
     @Override
