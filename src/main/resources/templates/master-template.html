@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}"></title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<style>
+    .page-header {
+        background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), url(/images/Finki-carousel-img1.jpg) center center no-repeat;
+        background-size: cover;
+    }
+    .suggestions-element {
+        background-color: #fff;
+        max-height: 150px;
+        overflow-y: auto;
+        width: 100%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 0px;
+        list-style-type: none;
+    }
+    .suggestions-element li {
+        padding: 12px 12px;
+        cursor: pointer;
+    }
+    .suggestions-element li:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+<body>
+<header th:replace="fragments/header.html"></header>
+<div th:if="${bodyContent != 'nns-meetings-page'}">
+    <div th:replace="fragments/page-header.html"></div>
+</div>
+<section th:include="${bodyContent}"></section>
+<footer th:replace="fragments/footer.html"></footer>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+
+        function showSuggestions(inputField, suggestionsValues) {
+            const suggestionsElement = document.createElement("ul");
+            suggestionsElement.className = "suggestions-element";
+            inputField.parentNode.appendChild(suggestionsElement)
+
+            inputField.addEventListener("input", function () {
+                const inputText = this.value.toLowerCase();
+                const filteredSuggestionsValues = suggestionsValues.filter(value => value.toLowerCase().includes(inputText));
+
+                suggestionsElement.innerHTML = "";
+
+                filteredSuggestionsValues.forEach(value => {
+                    const elementItem = document.createElement("li");
+                    elementItem.textContent = value
+
+                    elementItem.addEventListener("click", () => {
+                        const studentEdit = document.getElementById("student-edit")
+                        const studentDelete = document.getElementById("student-delete")
+
+                        inputField.value = value
+                        suggestionsElement.innerHTML = ""
+
+                        if (studentEdit != null) {
+                            const parts = value.split(" ")
+                            const id = parts[2]
+
+                            studentEdit.setAttribute("href", "/students/" + id + "/edit")
+                            studentDelete.setAttribute("href", "/students/" + id + "/delete")
+                        }
+                    });
+
+                    suggestionsElement.appendChild(elementItem)
+                });
+            });
+
+            inputField.addEventListener("blur", () => {
+                setTimeout(() => {
+                    suggestionsElement.innerHTML = "";
+                }, 200);
+            });
+        }
+
+        const subCategory = document.getElementById("subCategoryName")
+        const subCategorySuggestionsValues = [[${subCategories}]]
+        if (subCategory != null)
+            showSuggestions(subCategory, subCategorySuggestionsValues)
+
+        const student = document.getElementById("studentFullNameId")
+        const studentSuggestionsValues = [[${students}]]
+        if (student != null)
+            showSuggestions(student, studentSuggestionsValues)
+    });
+</script>
+</body>
+</html>
