@@ -2,11 +2,11 @@ package mk.ukim.finki.wp.project.ednevnik.model.enumerations;
 
 public enum ProfessorRole {
 
-    DEMONSTRATOR,
-    ASSISTANT,
-    DOCENT,
-    ASSOCIATE_PROFESSOR,
-    PROFESSOR,
-    VICE_DEAN,
-    DEAN
+    ДЕМОНСТРАТОР,
+    АСИСТЕНТ,
+    ДОЦЕНТ,
+    ВОНРЕДЕН_ПРОФЕСОР,
+    ПРОФЕСОР,
+    ПРОДЕКАН,
+    ДЕКАН
 }

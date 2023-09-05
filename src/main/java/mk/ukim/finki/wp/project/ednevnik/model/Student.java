@@ -10,8 +10,7 @@ import java.util.List;
 public class Student {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // indeks
 
     private String name;
     private String surname;
@@ -19,9 +18,10 @@ public class Student {
     @OneToMany(mappedBy = "student")
     private List<Topic> topics;
 
-    public Student(String name, String surname) {
+    public Student(String name, String surname, Long id) {
         this.name = name;
         this.surname = surname;
+        this.id = id;
     }
 
     public Student() {

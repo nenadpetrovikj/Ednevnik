@@ -1,32 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>NNS Meetings</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <script src="../static/js/bootstrap.min.js"></script>
-</head>
-<body>
-<h1>NNS Meetings</h1>
-<a href="/nns-meetings/add">[Add a new NNS Meeting]</a>
-<br>
-<h3>All NNS Meetings Sorted By Date In Descending Order</h3>
-<table>
-    <tr>
-        <th>#</th>
-        <th>Date</th>
-        <th>Serial Number</th>
-    </tr>
-    <tr th:each="nnsmeeting, iterator : ${nnsMeetings}">
-        <td th:text="${iterator.index+1 + '. '}"></td>
-        <td th:text="${nnsmeeting.date}"></td>
-        <td th:text="${nnsmeeting.serialCode}"></td>
-        <td>
-            <a th:href="@{'/nns-meetings/{id}/topics-list' (id=${nnsmeeting.id})}">[Show list of topics for this NNS Meetings]</a>
-        </td>
-    </tr>
-</table>
-<br>
-<a href="/home">[Home]</a>
-</body>
-</html>
+<th:block>
+<!--    Carousel-->
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="/images/Finki-carousel-img1.jpg" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+                <img src="/images/Finki-carousel-img2.jpg" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+                <img src="/images/Finki-carousel-img3.jpg" class="d-block w-100" alt="...">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+<!--    Content-->
+     <div class="container my-4 py-4">
+         <div class="row align-items-center">
+             <div class="col-10">
+                 <h1 class="fs-2 pt-4">ННС Седници</h1>
+                 <p class="text-muted">Изберете ја седницата која сакате да ја разгледате</p>
+             </div>
+             <div class="col-2">
+                 <a href="/nns-meetings/add" class="btn btn-outline-danger w-100">Додади нова седница</a>
+             </div>
+         </div>
+         <div class="my-4 py-4">
+             <form action="/nns-meetings" method="post">
+                 <label for="selectDateBefore" class="mb-2">Изберете датум и сите седници одржани пред и на тој датум ќе бидат прикажани</label>
+                 <select name="date" class="form-select mb-3" id="selectDateBefore">
+                     <option th:value="${latest?.date}">сите</option>
+                     <option th:each="meeting : ${nnsMeetings}"
+                             th:if="${meeting.date != latest.date}"
+                             th:value="${meeting.date}"
+                             th:text="${meeting.date}"
+                             th:selected="${meeting.date == selectedDate}"></option>
+                     </option>
+                 </select>
+                 <button class="btn btn-outline-primary">Филтрирај</button>
+             </form>
+             <table class="table table-hover mt-4">
+                 <tr>
+                     <th>#</th>
+                     <th class="col">Датум на седница</th>
+                     <th class="col">Сериски број</th>
+                     <th class="col"></th>
+                 </tr>
+                 <tr th:each="meeting, iterator : ${nnsMeetings}">
+                     <td th:text="${iterator.index+1}"></td>
+                     <td th:text="${meeting.date}"></td>
+                     <td th:text="${meeting.serialCode}"></td>
+                     <td><a class="link-underline-opacity-0 link-primary" th:href="@{'/nns-meetings/{id}/topics-list' (id=${meeting.id})}">Разгледај ја оваа седница</a></td>
+                 </tr>
+             </table>
+         </div>
+     </div>
+<!--    <div>-->
+<!--        <h1>E - Dnevnik</h1>-->
+<!--    </div>-->
+<!--    <div>-->
+<!--        <a href="/nns-meetings">[NNS Meetings] </a>-->
+<!--        <a href="/professors">[Professors] </a>-->
+<!--        <a href="/students">[Students] </a>-->
+<!--    </div>-->
+<!--    <br>-->
+<!--    <div>-->
+<!--        <form action="/home" method="post">-->
+<!--            <select name="nnsMeetingId">-->
+<!--                <option value="0">all</option>-->
+<!--                <option th:each="meeting : ${nnsMeetings}" th:value="${meeting.id}" th:text="${meeting.date}"></option>-->
+<!--            </select>-->
+<!--            <select name="categoryName">-->
+<!--                <option value="all">all</option>-->
+<!--                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}"></option>-->
+<!--            </select>-->
+<!--            <select name="studentNameAndSurname">-->
+<!--                <option>all</option>-->
+<!--                <option th:each="student : ${students}" th:value="${student.name + ' ' + student.surname}"-->
+<!--                        th:text="${student.name + ' ' + student.surname}"></option>-->
+<!--            </select>-->
+<!--            <select name="professorNameAndSurname">-->
+<!--                <option>all</option>-->
+<!--                <option th:each="professor : ${professors}" th:if="${professor.name != '/'}"-->
+<!--                        th:value="${professor.name + ' ' + professor.surname}"-->
+<!--                        th:text="${professor.name + ' ' + professor.surname}"></option>-->
+<!--            </select>-->
+<!--            <button>Filter</button>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--    <br>-->
+<!--    <div>-->
+<!--        <table>-->
+<!--            <tr>-->
+<!--                <th>NNS Meeting date</th>-->
+<!--                <th>Category name</th>-->
+<!--                <th>Student name and surname</th>-->
+<!--                <th>Professor name and surname</th>-->
+<!--                <th>Description for topic</th>-->
+<!--                <th></th>-->
+<!--            </tr>-->
+<!--            <tr th:each="topic : ${topics}">-->
+<!--                <td th:text="${topic.getNnsMeeting().getDate()}"></td>-->
+<!--                <td th:text="${topic.getCategoryName()}"></td>-->
+<!--                <td th:text="${topic.getStudent().getName() + ' ' + topic.getStudent().getSurname()}"></td>-->
+<!--                <td th:text="${topic.getProfessor().getName() + ' ' + topic.getProfessor().getSurname()}"></td>-->
+<!--                <td th:text="${topic.getDescription()}"></td>-->
+<!--                <td><a th:href="@{'/nns-meetings/{id}/topics-list' (id=${topic.getNnsMeeting().getId()})}">take me to-->
+<!--                    this nns meeting</a></td>-->
+<!--            </tr>-->
+<!--        </table>-->
+<!--    </div>-->
+</th:block>

@@ -18,9 +18,11 @@ public class Topic {
     private TopicCategory categoryName;
 
     private String subCategoryName; // type
+    @Column(columnDefinition = "TEXT")
     private String description;
     private String serialNumber;
     private Boolean isAccepted;
+    @Column(columnDefinition = "TEXT")
     private String discussion;
 
     @ManyToOne

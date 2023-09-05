@@ -1,44 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${description}"></title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <script src="../static/js/bootstrap.min.js"></script>
-</head>
-<body>
-<h1 th:text="${description}"></h1>
-<form method="post" action="/professors">
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Role/Title</th>
-        </tr>
-        <tr>
-            <td>
-                <input type="text" name="name" th:value="${professor?.name}">
-            </td>
-            <td>
-                <input type="text" name="surname" th:value="${professor?.surname}">
-            </td>
-            <td>
-                <select name="professorRole">
-                    <option th:each="professorRole : ${professorRoles}"
-                            th:value="${professorRole}"
-                            th:text="${professorRole}"
-                            th:selected="${professorRole == professor?.getProfessorRole()}"></option>
-                </select>
-            </td>
-            <td>
+<th:block>
+    <div class="container my-4 py-4">
+        <h1 th:text="${title}" class="fs-2 pt-4"></h1>
+        <p th:if="${professor == null}" class="text-muted">Додадете нов професор брзо и едноставно</p>
+        <p th:unless="${professor == null}" class="text-muted">Направете промени на избраниот професор</p>
+        <div class="my-4 py-4">
+            <form method="post" action="/professors/make-changes">
+                <div class="mb-4">
+                    <label for="name" class="mb-2">Име</label>
+                    <input th:value="${professor?.name}" type="text" name="name" id="name" class="form-control">
+                </div>
+                <div class="mb-4">
+                    <label for="surname" class="mb-2">Презиме</label>
+                    <input th:value="${professor?.surname}" type="text" name="surname" id="surname" class="form-control">
+                </div>
+                <div class="mb-4">
+                    <label for="professorRole" class="mb-2">Титула</label>
+                    <select name="professorRole" id="professorRole" class="form-select">
+                        <option th:each="professorRole : ${professorRoles}"
+                                th:value="${professorRole}"
+                                th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(professorRole), '_', ' '))}"
+                                th:selected="${professorRole == professor?.getProfessorRole()}"></option>
+                    </select>
+                </div>
                 <input type="number" name="id" th:value="${professor?.id}" hidden="hidden">
-            </td>
-            <td>
-                <button type="submit" th:text="${description}"></button>
-            </td>
-        </tr>
-    </table>
-</form>
-<a href="/professors">[Back]</a>
-</body>
-</html>
+                <button th:if="${professor == null}" class="btn btn-outline-primary my-4 w-25">Додади</button>
+                <button th:unless="${professor == null}" class="btn btn-outline-primary my-4 w-25">Промени</button>
+            </form>
+        </div>
+    </div>
+</th:block>

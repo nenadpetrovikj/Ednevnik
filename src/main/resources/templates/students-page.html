@@ -1,35 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Students Page</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <script src="../static/js/bootstrap.min.js"></script>
-</head>
-<body>
-    <h1>List of students</h1>
-    <a href="/students/add">[Add a new student]</a>
-    <br>
-    <table>
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Surname</th>
-      </tr>
-      <tr th:each="student, iterator : ${students}">
-        <td th:text="${iterator.index+1 + '. '}"></td>
-        <td th:text="${student.name}"></td>
-        <td th:text="${student.surname}"></td>
-        <td>
-            <a th:href="@{'/students/{id}/edit' (id=${student.id})}">[Edit student]</a>
-        </td>
+<th:block>
+    <div class="container my-4 py-4">
+        <div class="row align-items-center">
+            <div class="col-10">
+                <h1 th:text="${title}" class="fs-2 my-4"></h1>
+                <p class="text-muted m-0">Изберете студент за кој сакате да ги разгледате записите од седниците</p>
+            </div>
+            <div class="col-2">
+                <a href="/students/add" class="btn btn-outline-danger w-100">Додади нов студент</a>
+            </div>
+        </div>
+        <div class="my-4 py-4">
+            <form autocomplete="off" action="/students" method="post" class="mb-4">
+                <label for="studentFullNameId" class="mb-2">Студент</label>
+                <div class="mb-3 row">
+                    <div class="col-10">
+                        <input th:value="${student != null ? (isStudentString ? student : student.name + ' ' + student.surname + ' ' + student.id) : ''}" type="text" name="studentFullNameId" id="studentFullNameId" class="form-control">
+                    </div>
+                    <div class="col-2 d-flex justify-content-end">
+                        <a id="student-edit" class="me-4"><i class="fa-regular fa-pen-to-square text-muted align-top"></i></a>
+                        <a id="student-delete"><i class="fa-solid fa-trash text-danger align-top"></i></a>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary">Филтрирај</button>
+            </form>
+            <div th:if="${topics != null}" class="py-4">
+                <div th:if="${isStudentString == false}" class="border-bottom">
+                    <h2 class="fs-4 m-0 py-4">Записи во кои е вклучен избраниот студент</h2>
+                    <p class="text-muted m-0">Записите се подредени според датумот на седницата на која припаѓаат</p>
+                    <form autocomplete="off" class="my-4 py-4" th:action="@{'/students/{id}/topics-list' (id=${student.id})}" method="post">
+                        <p class="mb-4">Изберете конкретни карактеристики според кои сакате да ги филтрирате записите</p>
+                        <div class="row">
+                            <div class="mb-3 col-6">
+                                <label for="categoryName" class="mb-2">Категорија</label>
+                                <select name="categoryName" id="categoryName" class="form-select">
+                                    <option th:value="Сите">Сите</option>
+                                    <option th:each="category : ${topicCategories}" th:value="${category}"
+                                            th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(category), '_', ' '))}"
+                                            th:selected="${category == selectedCat}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-6">
+                                <label for="subCategoryName" class="mb-2">Подкатегорија</label>
+                                <input th:value="${selectedSubCat != null ? selectedSubCat : ''}" type="text" name="subCategoryName" id="subCategoryName" class="form-control">
+                            </div>
+                            <div class="mb-3 col-6">
+                                <label for="professorId" class="mb-2">Професор</label>
+                                <select name="professorId" id="professorId" class="form-select">
+                                    <option th:value="-1">Сите</option>
+                                    <option th:each="professor : ${professors}" th:value="${professor.id}"
+                                            th:text="${professor.name + ' ' + professor.surname}"
+                                            th:selected="${selectedProf == professor.id}"></option>
+                                </select>
+                            </div>
+                            <div class="col-6 align-self-center">
+                                <button class="mt-3 btn btn-outline-primary w-100">Филтрирај</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div th:unless="${isStudentString == false}">
+                    <h2 class="fs-6 m-0 py-2">Ве молам изберете од понудената листа со студенти</h2>
+                </div>
+                <div th:each="topic : ${topics}" class="py-4 border-bottom">
+                    <div class="mb-4 pt-2 d-flex align-items-center">
+                        <h3 class="fs-5 m-0 flex-grow-1">Седница одржана на датум <span th:text="${topic.nnsMeeting.date}"></span></h3>
+                        <a th:href="@{'/nns-meetings/{id}/topics-list' (id=${topic.nnsMeeting.id})}" class="link-underline-opacity-0 link-primary">Разгледај повеќе детали за седницата</a>
+                    </div>
+                    <div>
+                        <p class="text-muted m-0">Конкретниот запис има сериски број: <span th:text="${topic.serialNumber}"></span></p>
+                        <p class="text-muted mb-4">Студентот е вклучен во категоријата: <span th:text="${#strings.capitalizeWords(#strings.replace(#strings.toLowerCase(topic.categoryName), '_', ' '))}"></span></p>
+                        <div>
+                            <p class="m-0 mb-1">Опис</p>
+                            <p th:text="${topic.description}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--    <h1>List of students</h1>-->
+<!--    <a href="/students/add">[Add a new student]</a>-->
+<!--    <br>-->
+<!--    <table>-->
+<!--      <tr>-->
+<!--        <th>#</th>-->
+<!--        <th>Name</th>-->
+<!--        <th>Surname</th>-->
+<!--      </tr>-->
+<!--      <tr th:each="student, iterator : ${students}">-->
+<!--        <td th:text="${iterator.index+1 + '. '}"></td>-->
+<!--        <td th:text="${student.name}"></td>-->
+<!--        <td th:text="${student.surname}"></td>-->
+<!--        <td>-->
+<!--            <a th:href="@{'/students/{id}/edit' (id=${student.id})}">[Edit student]</a>-->
+<!--        </td>-->
 <!--        <td>-->
 <!--            <form method="post" th:action="@{'/students/{id}/delete' (id=${student.id})}">-->
 <!--                <button type="submit">Delete</button>-->
 <!--            </form>-->
 <!--        </td>-->
-      </tr>
-    </table>
-    <a href="/home">[Home]</a>
-</body>
-</html>
+<!--      </tr>-->
+<!--    </table>-->
+<!--    <a href="/home">[Home]</a>-->
+</th:block>

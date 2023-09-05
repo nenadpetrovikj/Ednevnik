@@ -9,6 +9,8 @@ import java.util.List;
 public interface NNSMeetingService {
     List<NNSMeeting> findAllSortedByDateDesc();
 
+    List<NNSMeeting> findAllHeldBeforeSelectedDateDesc(LocalDate date);
+
     NNSMeeting findById(Long id);
 
     NNSMeeting create(String serialCode, LocalDate date);

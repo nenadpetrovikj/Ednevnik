@@ -1,14 +1,10 @@
 package mk.ukim.finki.wp.project.ednevnik.web;
 
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
-import mk.ukim.finki.wp.project.ednevnik.model.exceptions.NameOrSurnameFieldIsEmptyException;
-import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
-import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
+import mk.ukim.finki.wp.project.ednevnik.model.exceptions.StudentFormatException;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,38 +13,38 @@ import java.util.List;
 public class TopicController {
 
     private final TopicService topicService;
-    private final StudentService studentService;
-    private final ProfessorService professorService;
 
-    public TopicController(TopicService topicService, StudentService studentService, ProfessorService professorService) {
+    public TopicController(TopicService topicService) {
         this.topicService = topicService;
-        this.studentService = studentService;
-        this.professorService = professorService;
     }
 
     @PostMapping
-    public String createTopic(@RequestParam(required = false) Long id,
+    public String createTopic(@RequestParam Long nnsMeetingId,
                               @RequestParam TopicCategory categoryName,
-                              @RequestParam String subCategoryName,
-                              @RequestParam String description,
                               @RequestParam String serialNumber,
-                              @RequestParam Integer isAccepted,
-                              @RequestParam String discussion,
-                              @RequestParam String studentName,
-                              @RequestParam String studentSurname,
-                              @RequestParam Long professorId,
-                              @RequestParam Long nnsMeetingId,
-                              @RequestParam List<Long> professorsIds) {
+                              @RequestParam(required = false) Long id,
+                              @RequestParam(required = false) String subCategoryName,
+                              @RequestParam(required = false) String description,
+                              @RequestParam(required = false) Boolean isAccepted,
+                              @RequestParam(required = false) String discussion,
+                              @RequestParam(required = false) String studentFullNameId,
+                              @RequestParam(required = false) Long professorId,
+                              @RequestParam(required = false) List<Long> professorsIds) {
         try {
             if (id != null)
-                topicService.update(id, categoryName, subCategoryName, description, serialNumber, isAccepted == 1, discussion, nnsMeetingId, studentName, studentSurname, professorId, professorsIds);
+                topicService.update(id, categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeetingId, studentFullNameId, professorId, professorsIds);
             else
-                topicService.create(categoryName, subCategoryName, description, serialNumber, isAccepted == 1, discussion, nnsMeetingId, studentName, studentSurname, professorId, professorsIds);
-        } catch (NameOrSurnameFieldIsEmptyException e) {
+                topicService.create(categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeetingId, studentFullNameId, professorId, professorsIds);
+        } catch (StudentFormatException e) {
             throw new RuntimeException(e);
         }
 
         return "redirect:/nns-meetings/" + nnsMeetingId + "/topics-list";
+    }
+
+    @GetMapping("/{id}/delete")
+    public String deleteTopic(@PathVariable Long id) {
+        return "redirect:/nns-meetings/" + topicService.remove(id).getNnsMeeting().getId() + "/topics-list";
     }
 
 }
