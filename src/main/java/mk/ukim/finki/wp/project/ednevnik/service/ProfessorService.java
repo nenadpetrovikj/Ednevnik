@@ -5,11 +5,15 @@ import mk.ukim.finki.wp.project.ednevnik.model.Professor;
 import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.ProfessorRole;
 import mk.ukim.finki.wp.project.ednevnik.model.exceptions.StudentFormatException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface ProfessorService {
     List<Professor> findAll();
+
+    Page<Professor> findAllWithPagination(Pageable pageable);
 
     Professor findById(Long id);
 

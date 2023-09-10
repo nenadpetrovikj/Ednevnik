@@ -6,6 +6,9 @@ import mk.ukim.finki.wp.project.ednevnik.repository.NNSMeetingRepository;
 import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -22,6 +25,11 @@ public class NNSMeetingServiceImplementation implements NNSMeetingService {
     @Override
     public List<NNSMeeting> findAllSortedByDateDesc() {
         return nnsMeetingRepository.findAllByOrderByDateDesc();
+    }
+
+    @Override
+    public Page<NNSMeeting> findAllWithPagination(Pageable pageable) {
+        return nnsMeetingRepository.findAllByOrderByDateDesc(pageable);
     }
 
     @Override

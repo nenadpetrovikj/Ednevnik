@@ -8,6 +8,8 @@ import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
 import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
 import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,7 +38,27 @@ public class NNSMeetingController {
     @GetMapping
     public String getNNSMeetingsPage(Model model,
                               @RequestParam(required = false) List<NNSMeeting> filteredNNSMeetingsDesc,
-                              @RequestParam(required = false) LocalDate date) {
+                              @RequestParam(required = false) LocalDate date,
+                              @RequestParam(name = "page", defaultValue = "0") String pageString,
+                              @RequestParam(name = "size", defaultValue = "5") int size) {
+
+        int page;
+        try {
+            page = Integer.parseInt(pageString);
+        } catch (NumberFormatException e) {
+            // Handle invalid page parameter here, e.g., set a default value or return an error message
+            page = 0;
+        }
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<NNSMeeting> pagedData = nnsMeetingService.findAllWithPagination(pageable);
+
+        if (filteredNNSMeetingsDesc != null && filteredNNSMeetingsDesc.size() == nnsMeetingService.findAllSortedByDateDesc().size()) {
+            model.addAttribute("pagedData", pagedData);
+        }
+        if (!pageString.isEmpty()) {
+            model.addAttribute("pagedData", pagedData);
+        }
+
         List<NNSMeeting> nnsMeetingsDesc = nnsMeetingService.findAllSortedByDateDesc();
         if (nnsMeetingsDesc != null && !nnsMeetingsDesc.isEmpty())
             model.addAttribute("latest", nnsMeetingsDesc.get(0));
@@ -55,8 +77,8 @@ public class NNSMeetingController {
     }
 
     @PostMapping
-    public String findAllHeldBeforeSelectedDateDesc(Model model, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return getNNSMeetingsPage(model, nnsMeetingService.findAllHeldBeforeSelectedDateDesc(date), date);
+    public String findAllHeldBeforeSelectedDateDesc(Model model, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, @RequestParam(name = "page", defaultValue = "0") String pageString, @RequestParam(name = "size", defaultValue = "5") int size) {
+        return getNNSMeetingsPage(model, nnsMeetingService.findAllHeldBeforeSelectedDateDesc(date), date, "", size);
     }
 
     @GetMapping("/add")

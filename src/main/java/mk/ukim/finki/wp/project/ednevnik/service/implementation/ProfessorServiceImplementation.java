@@ -8,6 +8,8 @@ import mk.ukim.finki.wp.project.ednevnik.model.exceptions.StudentFormatException
 import mk.ukim.finki.wp.project.ednevnik.repository.ProfessorRepository;
 import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
 import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,6 +32,11 @@ public class ProfessorServiceImplementation implements ProfessorService {
     @Override
     public List<Professor> findAll() {
         return professorRepository.findAll();
+    }
+
+    @Override
+    public Page<Professor> findAllWithPagination(Pageable pageable) {
+        return professorRepository.findAllByOrderBySurnameAsc(pageable);
     }
 
     @Override

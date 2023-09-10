@@ -58,68 +58,55 @@
                      <th class="col">Сериски број</th>
                      <th class="col"></th>
                  </tr>
-                 <tr th:each="meeting, iterator : ${nnsMeetings}">
+                 <tr th:if="${pagedData == null}" th:each="meeting, iterator : ${nnsMeetings}">
+                     <td th:text="${iterator.index+1}"></td>
+                     <td th:text="${meeting.date}"></td>
+                     <td th:text="${meeting.serialCode}"></td>
+                     <td><a class="link-underline-opacity-0 link-primary" th:href="@{'/nns-meetings/{id}/topics-list' (id=${meeting.id})}">Разгледај ја оваа седница</a></td>
+                 </tr>
+                 <tr th:each="meeting, iterator : ${pagedData?.content}">
                      <td th:text="${iterator.index+1}"></td>
                      <td th:text="${meeting.date}"></td>
                      <td th:text="${meeting.serialCode}"></td>
                      <td><a class="link-underline-opacity-0 link-primary" th:href="@{'/nns-meetings/{id}/topics-list' (id=${meeting.id})}">Разгледај ја оваа седница</a></td>
                  </tr>
              </table>
+             <div class="d-flex justify-content-center mt-4">
+                 <ul th:if="${pagedData != null}" class="pagination">
+                     <li th:class="${pagedData.number == 0} ? 'disabled' : ''">
+                         <a th:href="@{/nns-meetings(page=0)}" aria-label="First">
+                             <span aria-hidden="true" class="mx-2">Прв</span>
+                         </a>
+                     </li>
+                     <li th:class="${pagedData.number < 0} ? 'disabled' : ''">
+                        <span th:if="${pagedData.number > 0}">
+                            <a th:href="@{/nns-meetings(page=${pagedData.number - 1})}" aria-label="Previous">
+                                <span aria-hidden="true" class="mx-2">Претходен</span>
+                            </a>
+                        </span>
+                        <span th:if="${pagedData.number == 0}">
+                            <span aria-hidden="true" disabled class="mx-2">Претходен</span>
+                        </span>
+                     </li>
+                     <li th:class="${pagedData.number == pagedData.totalPages - 1} ? 'disabled' : ''">
+                        <span th:if="${pagedData.number != pagedData.totalPages - 1}">
+                            <a th:href="@{/nns-meetings(page=${pagedData.number + 1})}" aria-label="Next">
+                                <span aria-hidden="true" class="mx-2">Нареден</span>
+                            </a>
+                        </span>
+                        <span th:if="${pagedData.number == pagedData.totalPages - 1}">
+                            <span aria-hidden="true" disabled class="mx-2">Нареден</span>
+                        </span>
+                     </li>
+                     <li th:class="${pagedData.number == pagedData.totalPages - 1} ? 'disabled' : ''">
+                         <a th:href="@{/nns-meetings(page=${pagedData.totalPages - 1})}" aria-label="Last">
+                             <span aria-hidden="true" class="mx-2">Последен</span>
+                         </a>
+                     </li>
+                 </ul>
+             </div>
          </div>
      </div>
-<!--    <div>-->
-<!--        <h1>E - Dnevnik</h1>-->
-<!--    </div>-->
-<!--    <div>-->
-<!--        <a href="/nns-meetings">[NNS Meetings] </a>-->
-<!--        <a href="/professors">[Professors] </a>-->
-<!--        <a href="/students">[Students] </a>-->
-<!--    </div>-->
-<!--    <br>-->
-<!--    <div>-->
-<!--        <form action="/home" method="post">-->
-<!--            <select name="nnsMeetingId">-->
-<!--                <option value="0">all</option>-->
-<!--                <option th:each="meeting : ${nnsMeetings}" th:value="${meeting.id}" th:text="${meeting.date}"></option>-->
-<!--            </select>-->
-<!--            <select name="categoryName">-->
-<!--                <option value="all">all</option>-->
-<!--                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}"></option>-->
-<!--            </select>-->
-<!--            <select name="studentNameAndSurname">-->
-<!--                <option>all</option>-->
-<!--                <option th:each="student : ${students}" th:value="${student.name + ' ' + student.surname}"-->
-<!--                        th:text="${student.name + ' ' + student.surname}"></option>-->
-<!--            </select>-->
-<!--            <select name="professorNameAndSurname">-->
-<!--                <option>all</option>-->
-<!--                <option th:each="professor : ${professors}" th:if="${professor.name != '/'}"-->
-<!--                        th:value="${professor.name + ' ' + professor.surname}"-->
-<!--                        th:text="${professor.name + ' ' + professor.surname}"></option>-->
-<!--            </select>-->
-<!--            <button>Filter</button>-->
-<!--        </form>-->
-<!--    </div>-->
-<!--    <br>-->
-<!--    <div>-->
-<!--        <table>-->
-<!--            <tr>-->
-<!--                <th>NNS Meeting date</th>-->
-<!--                <th>Category name</th>-->
-<!--                <th>Student name and surname</th>-->
-<!--                <th>Professor name and surname</th>-->
-<!--                <th>Description for topic</th>-->
-<!--                <th></th>-->
-<!--            </tr>-->
-<!--            <tr th:each="topic : ${topics}">-->
-<!--                <td th:text="${topic.getNnsMeeting().getDate()}"></td>-->
-<!--                <td th:text="${topic.getCategoryName()}"></td>-->
-<!--                <td th:text="${topic.getStudent().getName() + ' ' + topic.getStudent().getSurname()}"></td>-->
-<!--                <td th:text="${topic.getProfessor().getName() + ' ' + topic.getProfessor().getSurname()}"></td>-->
-<!--                <td th:text="${topic.getDescription()}"></td>-->
-<!--                <td><a th:href="@{'/nns-meetings/{id}/topics-list' (id=${topic.getNnsMeeting().getId()})}">take me to-->
-<!--                    this nns meeting</a></td>-->
-<!--            </tr>-->
-<!--        </table>-->
-<!--    </div>-->
+
+
 </th:block>
