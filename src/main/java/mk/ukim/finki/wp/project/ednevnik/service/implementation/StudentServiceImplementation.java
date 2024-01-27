@@ -27,10 +27,13 @@ public class StudentServiceImplementation implements StudentService {
     public List<Student> findAll() {
         return studentRepository.findAll();
     }
+//    public List<String> findAllAsString() {
+//        return studentRepository.findAll().stream().map(student -> student.getName() + ' ' + student.getSurname() + ' ' + student.getId()).toList();
+//    }
 
     @Override
     public Student findById(Long id) {
-        return studentRepository.findById(id).orElseGet(() -> null);
+        return studentRepository.findById(id).orElseThrow();
     }
 
     @Override
