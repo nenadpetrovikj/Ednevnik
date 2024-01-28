@@ -47,8 +47,7 @@ public class StudentController {
         List<Topic> topicsForStudent;
 
         if (student != null) {
-            topicsForStudent = student.getTopics().stream()
-                    .sorted(Comparator.<Topic, LocalDate>comparing(topic -> topic.getNnsMeeting().getDate()).reversed()).toList();
+            topicsForStudent = studentService.topicsForThisStudentSortedByTheirNNSMeetingDate(student);
             model.addAttribute("student", student);
             model.addAttribute("isStudentString", false);
             model.addAttribute("topicCategories", TopicCategory.values());
