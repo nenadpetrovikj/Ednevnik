@@ -34,10 +34,11 @@ class StudentControllerTest {
     @MockBean
     private StudentService studentService;
     @MockBean
-    private ProfessorService professorService;
-    @MockBean
     private TopicService topicService;
+    @MockBean
+    private ProfessorService professorService;
 
+    // TopicService & ProfessorService are used only to display the subcategories and professors in the filtering menu
 
     @Test
     void showStudentList() throws Exception {
@@ -151,14 +152,17 @@ class StudentControllerTest {
                 .andExpect(model().attribute("bodyContent", "student-add"));
     }
 
-    @Test
+    @Test  // first way (2nd way in professor test)
     void studentAdd() throws Exception {
         Long existingStudentId = 1L;
         Long newStudentId = 2L;
         String newName = "New student name example";
         String newSurname = "New student surname example";
 
+        Student student = new Student(newName, newSurname, newStudentId);
+
         // Simulate updating an existing student
+        Mockito.when(studentService.update(existingStudentId, newStudentId, newName, newSurname)).thenReturn(student);
         this.mockMvc
                 .perform(post("/students/make-changes")
                         .param("idOld", existingStudentId.toString())
@@ -177,7 +181,6 @@ class StudentControllerTest {
         Mockito.reset(studentService);
 
         // Simulate creating a new student
-        Student student = new Student(newName, newSurname, newStudentId);
         Mockito.when(studentService.create(newName + ' ' + newSurname + ' ' + newStudentId)).thenReturn(student);
         this.mockMvc
                 .perform(post("/students/make-changes")
