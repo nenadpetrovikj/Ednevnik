@@ -43,7 +43,7 @@
                  <select name="date" class="form-select mb-3" id="selectDateBefore">
                      <option th:value="${latest?.date}">сите</option>
                      <option th:each="meeting : ${nnsMeetings}"
-                             th:if="${meeting.date != latest.date}"
+                             th:if="${meeting != null && latest != null and meeting.date != null and latest.date != null and meeting.date != latest.date}"
                              th:value="${meeting.date}"
                              th:text="${meeting.date}"
                              th:selected="${meeting.date == selectedDate}"></option>
