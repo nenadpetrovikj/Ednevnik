@@ -34,7 +34,7 @@ public class StudentController {
 
     @GetMapping
     public String showStudentList(Model model) {
-        model.addAttribute("students", studentService.findAll().stream().map(student -> student.getName() + ' ' + student.getSurname() + ' ' + student.getId()).toList());
+        model.addAttribute("students", studentService.getAllStudentsInFormat());
 //        model.addAttribute("students", studentService.findAllAsString());
         model.addAttribute("title", "Студенти");
         model.addAttribute("bodyContent", "students-page");

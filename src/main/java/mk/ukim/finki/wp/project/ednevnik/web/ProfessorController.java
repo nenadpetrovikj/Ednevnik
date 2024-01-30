@@ -65,7 +65,7 @@ public class ProfessorController {
             model.addAttribute("topics", topicsThatIncludeChosenProf);
             model.addAttribute("topicCategories", TopicCategory.values());
             model.addAttribute("subCategories", topicService.getAllSubCategories());
-            model.addAttribute("students", studentService.findAll().stream().map(student -> student.getName() + ' ' + student.getSurname() + ' ' + student.getId()).toList());
+            model.addAttribute("students", studentService.getAllStudentsInFormat());
         }
 
         if (chosenProf == null) {
