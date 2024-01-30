@@ -88,6 +88,8 @@ class ProfessorControllerTest {
 
         Mockito.verify(professorService, Mockito.times(1)).findById(professorIdToShowTopics);
         Mockito.verify(professorService, Mockito.times(1)).topicsForThisProfSortedByTheirNNSMeetingDate(professor);
+        Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
+        Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
     }
 
     @Test
@@ -126,6 +128,8 @@ class ProfessorControllerTest {
 
         Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
         Mockito.verify(professorService, Mockito.times(1)).topicsForThisProfessorFilteredBySpecs(professor, categoryName, subCategoryName, studentFullNameId);
+        Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
+        Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
     }
 
     @Test

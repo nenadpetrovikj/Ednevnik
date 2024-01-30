@@ -42,15 +42,8 @@ class StudentControllerTest {
 
     @Test
     void showStudentList() throws Exception {
-        Student student = new Student("John", "Doe", 1L);
-
-        Mockito.when(studentService.findAll()).thenReturn(List.of(student));
-
         List<String> expectedResult = List.of("John Doe 1");
-
-//        Dokolku vo kontrolerot se povikuvase direkt findAllAsString();
-//        List<String> expectedResult = List.of("John Doe 1");
-//        Mockito.when(studentService.findAllAsString()).thenReturn(expectedResult);
+        Mockito.when(studentService.getAllStudentsInFormat()).thenReturn(expectedResult);
 
         this.mockMvc
                 .perform(get("/students"))
