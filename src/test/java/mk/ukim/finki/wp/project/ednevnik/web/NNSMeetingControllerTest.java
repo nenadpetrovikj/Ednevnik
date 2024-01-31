@@ -1,0 +1,178 @@
+package mk.ukim.finki.wp.project.ednevnik.web;
+
+import mk.ukim.finki.wp.project.ednevnik.model.NNSMeeting;
+import mk.ukim.finki.wp.project.ednevnik.model.Professor;
+import mk.ukim.finki.wp.project.ednevnik.model.Student;
+import mk.ukim.finki.wp.project.ednevnik.model.Topic;
+import mk.ukim.finki.wp.project.ednevnik.model.enumerations.ProfessorRole;
+import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
+import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
+import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
+import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
+import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(NNSMeetingController.class)
+class NNSMeetingControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private NNSMeetingService nnsMeetingService;
+    @MockBean
+    private ProfessorService professorService;
+    @MockBean
+    private StudentService studentService;
+    @MockBean
+    private TopicService topicService;
+
+    @Test
+    void findAllHeldBeforeSelectedDateDesc() throws Exception {
+        LocalDate selectedDate = LocalDate.of(2023, 1, 1);
+        List<NNSMeeting> filteredNNSMeetingsDesc = List.of(new NNSMeeting("100", LocalDate.of(2022, 1, 1)),
+                                                           new NNSMeeting("200", selectedDate));
+        Mockito.when(nnsMeetingService.findAllHeldBeforeSelectedDateDesc(selectedDate)).thenReturn(filteredNNSMeetingsDesc);
+
+        this.mockMvc
+                .perform(post("/nns-meetings")
+                        .param("date", selectedDate.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("nnsMeetings", filteredNNSMeetingsDesc))
+                .andExpect(model().attribute("selectedDate", selectedDate))
+                .andExpect(model().attribute("title", "ННС Седници"))
+                .andExpect(model().attributeExists("bodyContent"));
+
+        Mockito.verify(nnsMeetingService, Mockito.times(1)).findAllHeldBeforeSelectedDateDesc(selectedDate);
+    }
+
+    @Test
+    void getNNSMeetingAddPage() throws Exception {
+        this.mockMvc
+                .perform(get("/nns-meetings/add"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("title", "Додади Нова Седница"))
+                .andExpect(model().attributeExists("bodyContent"));
+    }
+
+    @Test
+    void createNNSMeeting() throws Exception {
+        String serialCode = "200";
+        LocalDate date = LocalDate.of(2023, 1, 1);
+
+        NNSMeeting nnsMeeting = new NNSMeeting(serialCode, date);
+
+        Mockito.when(nnsMeetingService.create(serialCode, date)).thenReturn(nnsMeeting);
+
+        this.mockMvc
+                .perform(post("/nns-meetings/add")
+                        .param("serialCode", serialCode)
+                        .param("date", date.toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/nns-meetings"));
+
+        Mockito.verify(nnsMeetingService, Mockito.times(1)).create(serialCode, date);
+    }
+
+    @Test
+    void showAddTopicsPage() throws Exception {
+        Long meetingId = 1L;
+        NNSMeeting nnsMeeting = new NNSMeeting("200", LocalDate.of(2023, 1, 1));
+        nnsMeeting.setId(meetingId);
+
+        Mockito.when(nnsMeetingService.findById(meetingId)).thenReturn(nnsMeeting);
+
+        mockMvc.perform(get("/nns-meetings/{id}/add-topic", meetingId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("nnsMeeting", nnsMeeting))
+                .andExpect(model().attribute("student", ""))
+                .andExpect(model().attribute("topicCategories", TopicCategory.values()))
+                .andExpect(model().attributeExists("professors"))
+                .andExpect(model().attributeExists("students"))
+                .andExpect(model().attributeExists("subCategories"))
+                .andExpect(model().attribute("title", "Додадете Нов Запис"))
+                .andExpect(model().attributeExists("bodyContent"));
+
+        Mockito.verify(nnsMeetingService, Mockito.times(1)).findById(meetingId);
+        Mockito.verify(professorService, Mockito.times(1)).findAll();
+        Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
+        Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
+    }
+
+    @Test
+    void getEditTopicPage() throws Exception {
+        Long meetingId = 1L;
+        Long topicId = 2L;
+
+        NNSMeeting nnsMeeting = new NNSMeeting("200", LocalDate.of(2023, 1, 1));
+        nnsMeeting.setId(meetingId);
+        Mockito.when(nnsMeetingService.findById(meetingId)).thenReturn(nnsMeeting);
+
+        Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
+        Student student = new Student("Bob", "Smith", 10L);
+        Topic topic = new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null);
+        topic.setId(topicId);
+
+        Mockito.when(topicService.findById(topicId)).thenReturn(topic);
+
+        this.mockMvc
+                .perform(get("/nns-meetings/{id}/edit-topic/{topicId}", meetingId, topicId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("nnsMeeting", nnsMeeting))
+                .andExpect(model().attribute("topic", topic))
+                .andExpect(model().attribute("topicCategories", TopicCategory.values()))
+                .andExpect(model().attributeExists("professors"))
+                .andExpect(model().attributeExists("students"))
+                .andExpect(model().attributeExists("subCategories"))
+                .andExpect(model().attribute("title", "Сменете Запис"))
+                .andExpect(model().attributeExists("bodyContent"));
+
+        Mockito.verify(nnsMeetingService, Mockito.times(1)).findById(meetingId);
+        Mockito.verify(professorService, Mockito.times(1)).findAll();
+        Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
+        Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
+        Mockito.verify(topicService, Mockito.times(1)).findById(topicId);
+    }
+
+    @Test
+    void showListTopicsPage() throws Exception {
+        Long meetingId = 1L;
+        NNSMeeting nnsMeeting = new NNSMeeting("200", LocalDate.of(2023, 1, 1));
+        nnsMeeting.setId(meetingId);
+
+        Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
+        Student student = new Student("Bob", "Smith", 10L);
+        List<Topic> topicsForNNSMeeting = List.of(new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null),
+                                                 new Topic(TopicCategory.ТРЕТ_ЦИКЛУС, "Subcategory name example", "Description example", "2.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
+
+        Mockito.when(nnsMeetingService.findById(meetingId)).thenReturn(nnsMeeting);
+        Mockito.when(nnsMeetingService.sortTopicsBySerialNumberForNNSMeeting(meetingId)).thenReturn(topicsForNNSMeeting);
+
+        mockMvc.perform(get("/nns-meetings/{id}/topics-list", meetingId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("nnsMeeting", nnsMeeting))
+                .andExpect(model().attribute("topics", topicsForNNSMeeting))
+                .andExpect(model().attribute("title", "Преглед На Седница"))
+                .andExpect(model().attributeExists("bodyContent"));
+
+        Mockito.verify(nnsMeetingService, Mockito.times(1)).findById(meetingId);
+        Mockito.verify(nnsMeetingService, Mockito.times(1)).sortTopicsBySerialNumberForNNSMeeting(meetingId);
+    }
+}
