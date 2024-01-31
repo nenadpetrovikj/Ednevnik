@@ -10,17 +10,17 @@
                 <a th:href="@{'/nns-meetings/{id}/add-topic' (id=${nnsMeeting.id})}" class="btn btn-outline-danger w-100">Додади нов запис</a>
             </div>
         </div>
-        <div class="my-4 py-4">
+        <div class="my-4 py-4">  <!-- counts occurrences of '.' in serial number -->
             <div th:each="topic : ${topics}" class="row align-items-center">
                 <h2 class="fs-3 my-4 col-10"
-                    th:if="${@stringUtility.countOccurrences(topic.serialNumber, '.') == 0}"
+                    th:if="${topic.serialNumber.replaceAll('[^.]', '').length() == 0}"
                     th:text="${topic.serialNumber + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + #strings.capitalizeWords(#strings.replace(#strings.toLowerCase(topic.categoryName), '_', ' '))}"
                 ></h2>
                 <h3 class="fs-4 my-3 col-10"
-                    th:if="${@stringUtility.countOccurrences(topic.serialNumber, '.') == 1}"
+                    th:if="${topic.serialNumber.replaceAll('[^.]', '').length() == 1}"
                     th:text="${topic.serialNumber + '&nbsp;&nbsp;&nbsp;&nbsp;' + topic.subCategoryName}"
                 ></h3>
-                <p class="col-10 my-2" th:unless="${@stringUtility.countOccurrences(topic.serialNumber, '.') == 0 or @stringUtility.countOccurrences(topic.serialNumber, '.') == 1}"
+                <p class="col-10 my-2" th:if="${topic.serialNumber.replaceAll('[^.]', '').length() > 1}"
                    th:text="${topic.serialNumber + '&nbsp;&nbsp;&nbsp;&nbsp;' + topic.description}"
                    style="white-space: pre-line;"></p>
                 <div class="col-2 d-flex justify-content-end">
