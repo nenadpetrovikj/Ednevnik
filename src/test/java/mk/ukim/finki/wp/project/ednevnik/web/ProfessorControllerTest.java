@@ -163,7 +163,7 @@ class ProfessorControllerTest {
         Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
     }
 
-    @Test // prepravi go ova kako vo student
+    @Test
     void professorAdd() throws Exception {
         Long professorIdToUpdate = 1L;
         String name = "John";
