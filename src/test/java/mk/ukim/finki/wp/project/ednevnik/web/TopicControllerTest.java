@@ -34,10 +34,40 @@ class TopicControllerTest {
 
         NNSMeeting nnsMeeting = new NNSMeeting();
         nnsMeeting.setId(nnsMeetingId);
-        Topic topic = new Topic(categoryName, subCategoryName, null, serialNumber, null, null, nnsMeeting, null, null, null);
-        topic.setId(topicId);
+        Topic topic = new Topic(categoryName, null, null, serialNumber, null, null, nnsMeeting, null, null, null);
 
-        // Simulate updating an existing topic
+        // Case id == null - creating a new topic
+        Mockito.when(topicService.create(categoryName, null, null, serialNumber, null, null, nnsMeetingId, null, null, null)).thenReturn(topic);
+        this.mockMvc
+                .perform(post("/topics")
+                        .param("nnsMeetingId", String.valueOf(nnsMeetingId))
+                        .param("categoryName", categoryName.toString())
+                        .param("serialNumber", serialNumber)
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/nns-meetings/" + nnsMeetingId + "/topics-list"));
+
+        Mockito.verify(topicService, Mockito.times(1)).create(categoryName, null, null, serialNumber, null, null, nnsMeetingId, null, null, null);
+        Mockito.verify(topicService, Mockito.never()).update(
+                Mockito.anyLong(),
+                Mockito.eq(categoryName),
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyBoolean(),
+                Mockito.anyString(),
+                Mockito.anyLong(),
+                Mockito.anyString(),
+                Mockito.anyLong(),
+                Mockito.anyList()
+        );
+
+        // Reset the mocks for the next test
+        Mockito.reset(topicService);
+
+        // Case id != null - updating an existing topic
+        topic.setId(topicId);
+        topic.setSubCategoryName("Subcategory name example");
         Mockito.when(topicService.update(topicId, categoryName, subCategoryName, null, serialNumber, null, null, nnsMeetingId, null, null, null)).thenReturn(topic);
         this.mockMvc
                 .perform(post("/topics")
@@ -49,6 +79,7 @@ class TopicControllerTest {
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nns-meetings/" + nnsMeetingId + "/topics-list"));
+
         Mockito.verify(topicService, Mockito.times(1)).update(topicId, categoryName, subCategoryName, null, serialNumber, null, null, nnsMeetingId, null, null, null);
         Mockito.verify(topicService, Mockito.never()).create(
                 Mockito.eq(categoryName),
@@ -57,37 +88,7 @@ class TopicControllerTest {
                 Mockito.anyString(),
                 Mockito.anyBoolean(),
                 Mockito.anyString(),
-                Mockito.eq(nnsMeetingId),
-                Mockito.anyString(),
                 Mockito.anyLong(),
-                Mockito.anyList()
-        );
-
-        // Reset the mocks for the next test
-        Mockito.reset(topicService);
-
-        // Simulate creating a new topic
-        Topic topicNew = new Topic(categoryName, null, null, serialNumber, null, null, nnsMeeting, null, null, null);
-        topicNew.setId(topicId);
-        Mockito.when(topicService.create(categoryName, null, null, serialNumber, null, null, nnsMeetingId, null, null, null)).thenReturn(topic);
-        this.mockMvc
-                .perform(post("/topics")
-                        .param("nnsMeetingId", String.valueOf(nnsMeetingId))
-                        .param("categoryName", categoryName.toString())
-                        .param("serialNumber", serialNumber)
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/nns-meetings/" + nnsMeetingId + "/topics-list"));
-        Mockito.verify(topicService, Mockito.times(1)).create(categoryName, null, null, serialNumber, null, null, nnsMeetingId, null, null, null);
-        Mockito.verify(topicService, Mockito.never()).update(
-                Mockito.anyLong(),
-                Mockito.eq(categoryName),
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyBoolean(),
-                Mockito.anyString(),
-                Mockito.eq(nnsMeetingId),
                 Mockito.anyString(),
                 Mockito.anyLong(),
                 Mockito.anyList()
@@ -97,16 +98,16 @@ class TopicControllerTest {
     @Test
     void deleteTopic() throws Exception {
         Long topicId = 1L;
+
         Long nnsMeetingId = 1L;
-
-        // Mock the topicService.remove method to return a Topic instance with NNSMeeting ID
-        Topic removedTopic = new Topic();
-        removedTopic.setId(topicId);
-
         NNSMeeting nnsMeeting = new NNSMeeting();
         nnsMeeting.setId(nnsMeetingId);
+
+        Topic removedTopic = new Topic();
+        removedTopic.setId(topicId);
         removedTopic.setNnsMeeting(nnsMeeting);
 
+        // Mock the topicService.remove(id) method to return a Topic instance with NNSMeeting ID
         Mockito.when(topicService.remove(topicId)).thenReturn(removedTopic);
 
         this.mockMvc
@@ -114,7 +115,6 @@ class TopicControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nns-meetings/" + nnsMeetingId + "/topics-list"));
 
-        // Verify that the topicService.remove method is called with the correct parameter
         Mockito.verify(topicService, Mockito.times(1)).remove(topicId);
     }
 }

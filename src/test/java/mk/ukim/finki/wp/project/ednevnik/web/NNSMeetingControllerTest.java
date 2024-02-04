@@ -1,10 +1,8 @@
 package mk.ukim.finki.wp.project.ednevnik.web;
 
 import mk.ukim.finki.wp.project.ednevnik.model.NNSMeeting;
-import mk.ukim.finki.wp.project.ednevnik.model.Professor;
 import mk.ukim.finki.wp.project.ednevnik.model.Student;
 import mk.ukim.finki.wp.project.ednevnik.model.Topic;
-import mk.ukim.finki.wp.project.ednevnik.model.enumerations.ProfessorRole;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
 import mk.ukim.finki.wp.project.ednevnik.service.NNSMeetingService;
 import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
@@ -42,21 +40,27 @@ class NNSMeetingControllerTest {
     @Test
     void findAllHeldBeforeSelectedDateDesc() throws Exception {
         LocalDate selectedDate = LocalDate.of(2023, 1, 1);
-        List<NNSMeeting> filteredNNSMeetingsDesc = List.of(new NNSMeeting("100", LocalDate.of(2022, 1, 1)),
-                                                           new NNSMeeting("200", selectedDate));
+
+        List<NNSMeeting> filteredNNSMeetingsDesc = List.of(new NNSMeeting("200", LocalDate.of(2023, 1, 1)),
+                                                           new NNSMeeting("100", LocalDate.of(2022, 1, 1)));
         Mockito.when(nnsMeetingService.findAllHeldBeforeSelectedDateDesc(selectedDate)).thenReturn(filteredNNSMeetingsDesc);
+
+        Mockito.when(nnsMeetingService.findAllSortedByDateDesc()).thenReturn(filteredNNSMeetingsDesc);
+        // returns the same result since .findAllHeldBeforeSelectedDateDesc already does the sorting by date internally
 
         this.mockMvc
                 .perform(post("/nns-meetings")
                         .param("date", selectedDate.toString()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("latest", filteredNNSMeetingsDesc.get(0)))
                 .andExpect(model().attribute("nnsMeetings", filteredNNSMeetingsDesc))
                 .andExpect(model().attribute("selectedDate", selectedDate))
                 .andExpect(model().attribute("title", "ННС Седници"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "nns-meetings-page"));
 
         Mockito.verify(nnsMeetingService, Mockito.times(1)).findAllHeldBeforeSelectedDateDesc(selectedDate);
+        Mockito.verify(nnsMeetingService, Mockito.times(2)).findAllSortedByDateDesc();
     }
 
     @Test
@@ -66,7 +70,7 @@ class NNSMeetingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
                 .andExpect(model().attribute("title", "Додади Нова Седница"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "nns-meeting-add"));
     }
 
     @Test
@@ -75,7 +79,6 @@ class NNSMeetingControllerTest {
         LocalDate date = LocalDate.of(2023, 1, 1);
 
         NNSMeeting nnsMeeting = new NNSMeeting(serialCode, date);
-
         Mockito.when(nnsMeetingService.create(serialCode, date)).thenReturn(nnsMeeting);
 
         this.mockMvc
@@ -91,9 +94,9 @@ class NNSMeetingControllerTest {
     @Test
     void showAddTopicsPage() throws Exception {
         Long meetingId = 1L;
+
         NNSMeeting nnsMeeting = new NNSMeeting("200", LocalDate.of(2023, 1, 1));
         nnsMeeting.setId(meetingId);
-
         Mockito.when(nnsMeetingService.findById(meetingId)).thenReturn(nnsMeeting);
 
         mockMvc.perform(get("/nns-meetings/{id}/add-topic", meetingId))
@@ -106,7 +109,7 @@ class NNSMeetingControllerTest {
                 .andExpect(model().attributeExists("students"))
                 .andExpect(model().attributeExists("subCategories"))
                 .andExpect(model().attribute("title", "Додадете Нов Запис"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "add-topic-page"));
 
         Mockito.verify(nnsMeetingService, Mockito.times(1)).findById(meetingId);
         Mockito.verify(professorService, Mockito.times(1)).findAll();
@@ -117,31 +120,32 @@ class NNSMeetingControllerTest {
     @Test
     void getEditTopicPage() throws Exception {
         Long meetingId = 1L;
-        Long topicId = 2L;
+        Long topicId = 1L;
 
         NNSMeeting nnsMeeting = new NNSMeeting("200", LocalDate.of(2023, 1, 1));
         nnsMeeting.setId(meetingId);
         Mockito.when(nnsMeetingService.findById(meetingId)).thenReturn(nnsMeeting);
 
-        Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
-        Student student = new Student("Bob", "Smith", 10L);
-        Topic topic = new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null);
+        Student student = new Student("Bob", "Smith", 1L);
+        Topic topic = new Topic(TopicCategory.ОСТАНАТО, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, null, null);
         topic.setId(topicId);
-
         Mockito.when(topicService.findById(topicId)).thenReturn(topic);
+
+        String expectedStudentString = "Bob Smith 1";
 
         this.mockMvc
                 .perform(get("/nns-meetings/{id}/edit-topic/{topicId}", meetingId, topicId))
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
                 .andExpect(model().attribute("nnsMeeting", nnsMeeting))
+                .andExpect(model().attribute("student", expectedStudentString))
                 .andExpect(model().attribute("topic", topic))
                 .andExpect(model().attribute("topicCategories", TopicCategory.values()))
                 .andExpect(model().attributeExists("professors"))
                 .andExpect(model().attributeExists("students"))
                 .andExpect(model().attributeExists("subCategories"))
                 .andExpect(model().attribute("title", "Сменете Запис"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "add-topic-page"));
 
         Mockito.verify(nnsMeetingService, Mockito.times(1)).findById(meetingId);
         Mockito.verify(professorService, Mockito.times(1)).findAll();
@@ -153,15 +157,13 @@ class NNSMeetingControllerTest {
     @Test
     void showListTopicsPage() throws Exception {
         Long meetingId = 1L;
+
         NNSMeeting nnsMeeting = new NNSMeeting("200", LocalDate.of(2023, 1, 1));
         nnsMeeting.setId(meetingId);
-
-        Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
-        Student student = new Student("Bob", "Smith", 10L);
-        List<Topic> topicsForNNSMeeting = List.of(new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null),
-                                                 new Topic(TopicCategory.ТРЕТ_ЦИКЛУС, "Subcategory name example", "Description example", "2.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
-
         Mockito.when(nnsMeetingService.findById(meetingId)).thenReturn(nnsMeeting);
+
+        List<Topic> topicsForNNSMeeting = List.of(new Topic(TopicCategory.ОСТАНАТО, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, null, null, null),
+                                                  new Topic(TopicCategory.ОСТАНАТО, "Subcategory name example", "Description example", "2.1.1", true, "Discussion example", nnsMeeting, null, null, null));
         Mockito.when(nnsMeetingService.sortTopicsBySerialNumberForNNSMeeting(meetingId)).thenReturn(topicsForNNSMeeting);
 
         mockMvc.perform(get("/nns-meetings/{id}/topics-list", meetingId))
@@ -170,7 +172,7 @@ class NNSMeetingControllerTest {
                 .andExpect(model().attribute("nnsMeeting", nnsMeeting))
                 .andExpect(model().attribute("topics", topicsForNNSMeeting))
                 .andExpect(model().attribute("title", "Преглед На Седница"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "list-topics"));
 
         Mockito.verify(nnsMeetingService, Mockito.times(1)).findById(meetingId);
         Mockito.verify(nnsMeetingService, Mockito.times(1)).sortTopicsBySerialNumberForNNSMeeting(meetingId);

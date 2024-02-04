@@ -40,54 +40,60 @@ class ProfessorControllerTest {
 
     @Test
     void filterByProfessor() throws Exception {
-        Long professorIdToFilter = 1L;
+        Long professorId = 1L;
+
         Professor professor = new Professor("John", "Doe", ProfessorRole.ПРОФЕСОР);
-        professor.setId(professorIdToFilter);
-        Mockito.when(professorService.findById(professorIdToFilter)).thenReturn(professor);
+        professor.setId(professorId);
+        Mockito.when(professorService.findById(professorId)).thenReturn(professor);
 
         this.mockMvc
-                .perform(post("/professors").param("filterByProfessor", professorIdToFilter.toString()))
+                .perform(post("/professors").param("filterByProfessor", professorId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
                 .andExpect(model().attribute("chosenProf", professor))
-                .andExpect(model().attribute("title", "Професори"))
+                .andExpect(model().attribute("showTopics", false))
                 .andExpect(model().attributeExists("professorsInFilter"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("title", "Професори"))
+                .andExpect(model().attribute("bodyContent", "professors-page"));
 
-        Mockito.verify(professorService, Mockito.times(1)).findById(professorIdToFilter);
+        Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
+        Mockito.verify(professorService, Mockito.times(2)).findAll();
+
+        // professorService.findAllWithPagination(pageable); - didn't focus on paging related tests
     }
 
 
     @Test
     void showTopicsForProfessor() throws Exception {
-        Long professorIdToShowTopics = 1L;
+        Long professorId = 1L;
+
         Professor professor = new Professor("John", "Doe", ProfessorRole.ПРОФЕСОР);
-        professor.setId(professorIdToShowTopics);
-        Mockito.when(professorService.findById(professorIdToShowTopics)).thenReturn(professor);
+        professor.setId(professorId);
+        Mockito.when(professorService.findById(professorId)).thenReturn(professor);
 
         NNSMeeting nnsMeeting = new NNSMeeting("100", LocalDate.now().minusDays(3));
         NNSMeeting nnsMeeting2 = new NNSMeeting("200", LocalDate.now());
-        Student student = new Student("Bob", "Smith", 10L);
-        Student student2 = new Student("Tony", "Allen", 20L);
-        List<Topic> topicsForProfessor = List.of(new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null),
-                                                 new Topic(TopicCategory.ТРЕТ_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting2, student2, professor, null));
-
+        List<Topic> topicsForProfessor = List.of(new Topic(TopicCategory.КАДРОВСКИ_ПРАШАЊА, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, null, professor, null),
+                                                 new Topic(TopicCategory.ОСТАНАТО, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting2, null, professor, null));
         Mockito.when(professorService.topicsForThisProfSortedByTheirNNSMeetingDate(professor)).thenReturn(topicsForProfessor);
 
         this.mockMvc
-                .perform(get("/professors/{id}/topics-list", professorIdToShowTopics))
+                .perform(get("/professors/{id}/topics-list", professorId))
                 .andExpect(status().isOk())
-                .andExpect(view().name("master-template")) // Adjust the view name as needed
+                .andExpect(view().name("master-template"))
                 .andExpect(model().attribute("chosenProf", professor))
                 .andExpect(model().attribute("topics", topicsForProfessor))
                 .andExpect(model().attribute("topicCategories", TopicCategory.values()))
+                .andExpect(model().attribute("showTopics", true))
+                .andExpect(model().attributeExists("professorsInFilter"))
                 .andExpect(model().attributeExists("subCategories"))
                 .andExpect(model().attributeExists("students"))
                 .andExpect(model().attribute("title", "Професори"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "professors-page"));
 
-        Mockito.verify(professorService, Mockito.times(1)).findById(professorIdToShowTopics);
+        Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
         Mockito.verify(professorService, Mockito.times(1)).topicsForThisProfSortedByTheirNNSMeetingDate(professor);
+        Mockito.verify(professorService, Mockito.times(2)).findAll();
         Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
         Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
     }
@@ -95,18 +101,18 @@ class ProfessorControllerTest {
     @Test
     void showTopicsForProfessorFilteredBySpecs() throws Exception {
         Long professorId = 1L;
-        String categoryName = TopicCategory.ВТОР_ЦИКЛУС.name();
+        String categoryName = TopicCategory.КАДРОВСКИ_ПРАШАЊА.name();
         String subCategoryName = "Subcategory name example";
-        String studentFullNameId = "Bob Smith 10";
+        String studentFullNameId = "Bob Smith 1";
 
         Professor professor = new Professor("John", "Doe", ProfessorRole.ПРОФЕСОР);
         professor.setId(professorId);
         Mockito.when(professorService.findById(professorId)).thenReturn(professor);
 
         NNSMeeting nnsMeeting = new NNSMeeting("100", LocalDate.now().minusDays(3));
-        Student student = new Student("Bob", "Smith", 10L);
-        List<Topic> filteredTopics = List.of(new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
-        Mockito.when(professorService.topicsForThisProfessorFilteredBySpecs(professor, categoryName, subCategoryName, studentFullNameId)).thenReturn(filteredTopics);
+        Student student = new Student("Bob", "Smith", 1L);
+        List<Topic> topicsForProfessor = List.of(new Topic(TopicCategory.КАДРОВСКИ_ПРАШАЊА, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
+        Mockito.when(professorService.topicsForThisProfessorFilteredBySpecs(professor, categoryName, subCategoryName, studentFullNameId)).thenReturn(topicsForProfessor);
 
         this.mockMvc
                 .perform(post("/professors/{id}/topics-list", professorId)
@@ -116,18 +122,21 @@ class ProfessorControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
                 .andExpect(model().attribute("chosenProf", professor))
-                .andExpect(model().attribute("topics", filteredTopics))
+                .andExpect(model().attribute("topics", topicsForProfessor))
                 .andExpect(model().attribute("selectedCat", TopicCategory.valueOf(categoryName)))
                 .andExpect(model().attribute("selectedSubCat", subCategoryName))
                 .andExpect(model().attribute("selectedStudent", studentFullNameId))
                 .andExpect(model().attribute("topicCategories", TopicCategory.values()))
+                .andExpect(model().attribute("showTopics", true))
+                .andExpect(model().attributeExists("professorsInFilter"))
                 .andExpect(model().attributeExists("subCategories"))
                 .andExpect(model().attributeExists("students"))
                 .andExpect(model().attribute("title", "Професори"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "professors-page"));
 
         Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
         Mockito.verify(professorService, Mockito.times(1)).topicsForThisProfessorFilteredBySpecs(professor, categoryName, subCategoryName, studentFullNameId);
+        Mockito.verify(professorService, Mockito.times(2)).findAll();
         Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
         Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
     }
@@ -147,6 +156,7 @@ class ProfessorControllerTest {
     @Test
     void showProfessorEdit() throws Exception {
         Long professorId = 1L;
+
         Professor professor = new Professor("John", "Doe", ProfessorRole.ПРОФЕСОР);
         professor.setId(professorId);
         Mockito.when(professorService.findById(professorId)).thenReturn(professor);
@@ -163,7 +173,7 @@ class ProfessorControllerTest {
         Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
     }
 
-    @Test
+    @Test // prepravi go kako student
     void professorAdd() throws Exception {
         Long professorIdToUpdate = 1L;
         String name = "John";
@@ -171,14 +181,25 @@ class ProfessorControllerTest {
         ProfessorRole professorRole = ProfessorRole.ПРОФЕСОР;
 
         Professor professor = new Professor(name, surname, professorRole);
+
+        // Case id == null - creating a new professor
+        Mockito.when(professorService.create(name, surname, professorRole)).thenReturn(professor);
+        this.mockMvc
+                .perform(post("/professors/make-changes")
+                        .param("name", name)
+                        .param("surname", surname)
+                        .param("professorRole", professorRole.name()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/professors"));
+        Mockito.verify(professorService, Mockito.never()).update(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(), Mockito.eq(professorRole));
+        Mockito.verify(professorService, Mockito.times(1)).create(name, surname, professorRole);
+
+        // Reset the mocks for the next test
+        Mockito.reset(professorService);
+
+        // Case id != null - updating an existent professor
         professor.setId(professorIdToUpdate);
-
-        if (professorIdToUpdate != null) {
-            Mockito.when(professorService.update(professorIdToUpdate, name, surname, professorRole)).thenReturn(professor);
-        } else {
-            Mockito.when(professorService.create(name, surname, professorRole)).thenReturn(professor);
-        }
-
+        Mockito.when(professorService.update(professorIdToUpdate, name, surname, professorRole)).thenReturn(professor);
         this.mockMvc
                 .perform(post("/professors/make-changes")
                         .param("id", String.valueOf(professorIdToUpdate))
@@ -187,17 +208,17 @@ class ProfessorControllerTest {
                         .param("professorRole", professorRole.name()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/professors"));
-
-        if (professorIdToUpdate != null) {
-            Mockito.verify(professorService, Mockito.times(1)).update(professorIdToUpdate, name, surname, professorRole);
-        } else {
-            Mockito.verify(professorService, Mockito.times(1)).create(name, surname, professorRole);
-        }
+        Mockito.verify(professorService, Mockito.times(1)).update(professorIdToUpdate, name, surname, professorRole);
+        Mockito.verify(professorService, Mockito.never()).create(Mockito.anyString(), Mockito.anyString(), Mockito.any());
     }
 
     @Test
     void deleteProf() throws Exception {
         Long professorIdToDelete = 1L;
+
+        Professor professor = new Professor("John", "Doe", ProfessorRole.ПРОФЕСОР);
+        professor.setId(professorIdToDelete);
+        Mockito.when(professorService.remove(professorIdToDelete)).thenReturn(professor);
 
         this.mockMvc
                 .perform(get("/professors/{id}/delete", professorIdToDelete))

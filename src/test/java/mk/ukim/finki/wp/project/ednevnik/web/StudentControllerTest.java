@@ -38,55 +38,62 @@ class StudentControllerTest {
     @MockBean
     private ProfessorService professorService;
 
-    // TopicService & ProfessorService are used only to display the subcategories and professors in the filtering menu
-
     @Test
     void showStudentList() throws Exception {
-        List<String> expectedResult = List.of("John Doe 1");
-        Mockito.when(studentService.getAllStudentsInFormat()).thenReturn(expectedResult);
+        List<String> studentStringFormat = List.of("John Doe 1");
+        Mockito.when(studentService.getAllStudentsInFormat()).thenReturn(studentStringFormat);
 
         this.mockMvc
                 .perform(get("/students"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
-                .andExpect(model().attribute("students", expectedResult))
+                .andExpect(model().attribute("students", studentStringFormat))
                 .andExpect(model().attribute("title", "Студенти"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "students-page"));
+
+        // .verify - checks if a specific method on the mocked object was called with the specified arguments
+        // .times - specifies the number of times the method should have been called
+        Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
     }
 
     @Test
     void showTopicsForStudent() throws Exception {
-        Student student = new Student("John", "Doe", 1L);
         String studentFullNameId = "John Doe 1";
+
+        Student student = new Student("John", "Doe", 1L);
         Mockito.when(studentService.checkFormatAndReturnStudent(studentFullNameId)).thenReturn(student);
 
-        NNSMeeting nnsMeeting = new NNSMeeting("100", LocalDate.now().minusDays(3));
+        NNSMeeting nnsMeeting1 = new NNSMeeting("100", LocalDate.now().minusDays(3));
         NNSMeeting nnsMeeting2 = new NNSMeeting("200", LocalDate.now());
-        Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
-        Professor professor2 = new Professor("Tony", "Allen", ProfessorRole.АСИСТЕНТ);
-
-        List<Topic> topics = List.of(new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null),
-                                     new Topic(TopicCategory.ТРЕТ_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting2, student, professor2, null));
-        Mockito.when(studentService.topicsForThisStudentSortedByTheirNNSMeetingDate(student)).thenReturn(topics);
+        List<Topic> topicsForStudent = List.of(new Topic(TopicCategory.КАДРОВСКИ_ПРАШАЊА, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting1, student, null, null),
+                                               new Topic(TopicCategory.ОСТАНАТО, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting2, student, null, null));
+        Mockito.when(studentService.topicsForThisStudentSortedByTheirNNSMeetingDate(student)).thenReturn(topicsForStudent);
 
         this.mockMvc
                 .perform(post("/students").param("studentFullNameId", studentFullNameId))
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
                 .andExpect(model().attribute("student", student))
-                .andExpect(model().attribute("topics", topics))
+                .andExpect(model().attribute("topics", topicsForStudent))
                 .andExpect(model().attribute("isStudentString", false))
                 .andExpect(model().attribute("topicCategories", TopicCategory.values()))
                 .andExpect(model().attributeExists("subCategories"))
                 .andExpect(model().attributeExists("professors"))
                 .andExpect(model().attribute("title", "Студенти"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "students-page"));
+
+        Mockito.verify(studentService, Mockito.times(1)).checkFormatAndReturnStudent(studentFullNameId);
+        Mockito.verify(studentService, Mockito.times(1)).topicsForThisStudentSortedByTheirNNSMeetingDate(student);
+        Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
+        Mockito.verify(professorService, Mockito.times(1)).findAll();
+
+        // exception is not handled properly in controller, so method execution will fail before entering if condition
     }
 
     @Test
     void showTopicsForStudentFilteredBySpecs() throws Exception {
         Long studentId = 1L;
-        String categoryName = TopicCategory.ВТОР_ЦИКЛУС.name();
+        String categoryName = TopicCategory.КАДРОВСКИ_ПРАШАЊА.name();
         String subCategoryName = "Subcategory name example";
         Long professorId = 1L;
 
@@ -96,8 +103,8 @@ class StudentControllerTest {
         NNSMeeting nnsMeeting = new NNSMeeting("100", LocalDate.now().minusDays(3));
         Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
         professor.setId(professorId);
-        List<Topic> topics = List.of(new Topic(TopicCategory.ВТОР_ЦИКЛУС, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
-        Mockito.when(studentService.topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId)).thenReturn(topics);
+        List<Topic> topicsForStudent = List.of(new Topic(TopicCategory.КАДРОВСКИ_ПРАШАЊА, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
+        Mockito.when(studentService.topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId)).thenReturn(topicsForStudent);
 
         this.mockMvc
                 .perform(post("/students/{id}/topics-list", studentId)
@@ -106,7 +113,7 @@ class StudentControllerTest {
                         .param("professorId", professorId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("master-template"))
-                .andExpect(model().attribute("topics", topics))
+                .andExpect(model().attribute("topics", topicsForStudent))
                 .andExpect(model().attribute("selectedCat", TopicCategory.valueOf(categoryName)))
                 .andExpect(model().attribute("selectedSubCat", subCategoryName))
                 .andExpect(model().attribute("selectedProf", professorId))
@@ -116,7 +123,12 @@ class StudentControllerTest {
                 .andExpect(model().attributeExists("subCategories"))
                 .andExpect(model().attributeExists("professors"))
                 .andExpect(model().attribute("title", "Студенти"))
-                .andExpect(model().attributeExists("bodyContent"));
+                .andExpect(model().attribute("bodyContent", "students-page"));
+
+        Mockito.verify(studentService, Mockito.times(1)).findById(studentId);
+        Mockito.verify(studentService, Mockito.times(1)).topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId);
+        Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
+        Mockito.verify(professorService, Mockito.times(1)).findAll();
     }
 
     @Test
@@ -132,8 +144,8 @@ class StudentControllerTest {
     @Test
     void showStudentEdit() throws Exception {
         Long studentId = 1L;
-        Student student = new Student("John", "Doe", studentId);
 
+        Student student = new Student("John", "Doe", studentId);
         Mockito.when(studentService.findById(studentId)).thenReturn(student);
 
         this.mockMvc
@@ -143,9 +155,11 @@ class StudentControllerTest {
                 .andExpect(model().attribute("student", student))
                 .andExpect(model().attribute("title", "Сменете Студент"))
                 .andExpect(model().attribute("bodyContent", "student-add"));
+
+        Mockito.verify(studentService, Mockito.times(1)).findById(studentId);
     }
 
-    @Test  // first way (2nd way in professor test)
+    @Test
     void studentAdd() throws Exception {
         Long existingStudentId = 1L;
         Long newStudentId = 2L;
@@ -154,7 +168,7 @@ class StudentControllerTest {
 
         Student student = new Student(newName, newSurname, newStudentId);
 
-        // Simulate updating an existing student
+        // Case idOld != null - updating an existing student
         Mockito.when(studentService.update(existingStudentId, newStudentId, newName, newSurname)).thenReturn(student);
         this.mockMvc
                 .perform(post("/students/make-changes")
@@ -165,15 +179,13 @@ class StudentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/students"));
 
-        // .verify - checks if a specific method on the mocked object was called with the specified arguments
-        // .times - specifies the number of times the method should have been called
         Mockito.verify(studentService, Mockito.times(1)).update(existingStudentId, newStudentId, newName, newSurname);
         Mockito.verify(studentService, Mockito.never()).create(Mockito.anyString());
 
         // Reset the mocks for the next test
         Mockito.reset(studentService);
 
-        // Simulate creating a new student
+        // Case idOld == null - creating a new student
         Mockito.when(studentService.create(newName + ' ' + newSurname + ' ' + newStudentId)).thenReturn(student);
         this.mockMvc
                 .perform(post("/students/make-changes")
@@ -190,6 +202,9 @@ class StudentControllerTest {
     @Test
     void studentDelete() throws Exception {
         Long studentIdToDelete = 1L;
+
+        Student student = new Student("John", "Doe", studentIdToDelete);
+        Mockito.when(studentService.remove(studentIdToDelete)).thenReturn(student);
 
         this.mockMvc
                 .perform(get("/students/{id}/delete", studentIdToDelete))
