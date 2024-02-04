@@ -118,7 +118,7 @@ public class ProfessorController {
     }
 
     @GetMapping("/{id}/edit")
-    public String showProfessorEdit(@PathVariable Long id, Model model) {
+    public String showProfessorEdit(Model model, @PathVariable Long id) {
         Professor professor = professorService.findById(id);
         model.addAttribute(professor);
         model.addAttribute("professorRoles", ProfessorRole.values());

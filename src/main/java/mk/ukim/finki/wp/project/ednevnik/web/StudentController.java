@@ -35,7 +35,6 @@ public class StudentController {
     @GetMapping
     public String showStudentList(Model model) {
         model.addAttribute("students", studentService.getAllStudentsInFormat());
-//        model.addAttribute("students", studentService.findAllAsString());
         model.addAttribute("title", "Студенти");
         model.addAttribute("bodyContent", "students-page");
         return "master-template";
@@ -72,8 +71,8 @@ public class StudentController {
                                                       @RequestParam(required = false) String subCategoryName,
                                                       @RequestParam (required = false) Long professorId) {
         Student student = studentService.findById(id);
-        List<Topic> topics = studentService.topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId);
-        model.addAttribute("topics", topics);
+        List<Topic> topicsForStudent = studentService.topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId);
+        model.addAttribute("topics", topicsForStudent);
         if (!categoryName.equalsIgnoreCase("Сите"))
             model.addAttribute("selectedCat", TopicCategory.valueOf(categoryName));
         model.addAttribute("selectedSubCat", subCategoryName);
@@ -94,7 +93,7 @@ public class StudentController {
     }
 
     @GetMapping("/{id}/edit")
-    public String showStudentEdit(@PathVariable Long id, Model model) {
+    public String showStudentEdit(Model model, @PathVariable Long id) {
         Student student = studentService.findById(id);
         model.addAttribute(student);
         model.addAttribute("title", "Сменете Студент");

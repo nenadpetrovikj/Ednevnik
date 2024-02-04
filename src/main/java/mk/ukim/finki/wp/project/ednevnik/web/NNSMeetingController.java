@@ -52,6 +52,7 @@ public class NNSMeetingController {
         PageRequest pageable = PageRequest.of(page, size);
         Page<NNSMeeting> pagedData = nnsMeetingService.findAllWithPagination(pageable);
 
+        // if latest date is selected
         if (filteredNNSMeetingsDesc != null && filteredNNSMeetingsDesc.size() == nnsMeetingService.findAllSortedByDateDesc().size()) {
             model.addAttribute("pagedData", pagedData);
         }

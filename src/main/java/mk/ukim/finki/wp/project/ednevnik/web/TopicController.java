@@ -38,7 +38,6 @@ public class TopicController {
         } catch (StudentFormatException e) {
             throw new RuntimeException(e);
         }
-
         return "redirect:/nns-meetings/" + nnsMeetingId + "/topics-list";
     }
 
