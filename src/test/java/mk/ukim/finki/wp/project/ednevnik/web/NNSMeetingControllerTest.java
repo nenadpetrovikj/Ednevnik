@@ -37,6 +37,8 @@ class NNSMeetingControllerTest {
     @MockBean
     private TopicService topicService;
 
+    // Paging test to be done some other time, because of time constraint
+
     @Test
     void findAllHeldBeforeSelectedDateDesc() throws Exception {
         LocalDate selectedDate = LocalDate.of(2023, 1, 1);
@@ -152,6 +154,17 @@ class NNSMeetingControllerTest {
         Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
         Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
         Mockito.verify(topicService, Mockito.times(1)).findById(topicId);
+
+        // Case topic.getStudent() == null
+        topic.setStudent(null);
+        expectedStudentString = "";
+        this.mockMvc
+                .perform(get("/nns-meetings/{id}/edit-topic/{topicId}", meetingId, topicId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("student", expectedStudentString))
+                .andExpect(model().attribute("title", "Сменете Запис"))
+                .andExpect(model().attribute("bodyContent", "add-topic-page"));
     }
 
     @Test

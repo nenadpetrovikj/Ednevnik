@@ -6,10 +6,13 @@ import mk.ukim.finki.wp.project.ednevnik.model.Student;
 import mk.ukim.finki.wp.project.ednevnik.model.Topic;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.ProfessorRole;
 import mk.ukim.finki.wp.project.ednevnik.model.enumerations.TopicCategory;
+import mk.ukim.finki.wp.project.ednevnik.model.exceptions.StudentFormatException;
 import mk.ukim.finki.wp.project.ednevnik.service.ProfessorService;
 import mk.ukim.finki.wp.project.ednevnik.service.StudentService;
 import mk.ukim.finki.wp.project.ednevnik.service.TopicService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -87,13 +90,36 @@ class StudentControllerTest {
         Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
         Mockito.verify(professorService, Mockito.times(1)).findAll();
 
-        // exception is not handled properly in controller, so method execution will fail before entering if condition
+        // Reset the mocks for the next test
+        Mockito.reset(studentService);
+        Mockito.reset(topicService);
+        Mockito.reset(professorService);
+
+        String invalidStudentFullNameId = "John Doe";
+
+        Mockito.when(studentService.checkFormatAndReturnStudent(invalidStudentFullNameId)).thenReturn(null);
+
+        this.mockMvc
+                .perform(post("/students").param("studentFullNameId", invalidStudentFullNameId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attribute("student", invalidStudentFullNameId))
+                .andExpect(model().attribute("topics", List.of()))
+                .andExpect(model().attribute("isStudentString", true))
+                .andExpect(model().attribute("title", "Студенти"))
+                .andExpect(model().attribute("bodyContent", "students-page"));
+
+        Mockito.verify(studentService, Mockito.times(1)).checkFormatAndReturnStudent(invalidStudentFullNameId);
+        Mockito.verify(studentService, Mockito.never()).topicsForThisStudentSortedByTheirNNSMeetingDate(Mockito.any());
+        Mockito.verify(topicService, Mockito.never()).getAllSubCategories();
+        Mockito.verify(professorService, Mockito.never()).findAll();
     }
 
-    @Test
-    void showTopicsForStudentFilteredBySpecs() throws Exception {
+    @ParameterizedTest
+    @EnumSource(TopicCategory.class)
+    void showTopicsForStudentFilteredBySpecs(TopicCategory topicCategory) throws Exception {
         Long studentId = 1L;
-        String categoryName = TopicCategory.КАДРОВСКИ_ПРАШАЊА.name();
+        String categoryName = topicCategory.name();
         String subCategoryName = "Subcategory name example";
         Long professorId = 1L;
 
@@ -103,7 +129,7 @@ class StudentControllerTest {
         NNSMeeting nnsMeeting = new NNSMeeting("100", LocalDate.now().minusDays(3));
         Professor professor = new Professor("Bob", "Smith", ProfessorRole.ПРОФЕСОР);
         professor.setId(professorId);
-        List<Topic> topicsForStudent = List.of(new Topic(TopicCategory.КАДРОВСКИ_ПРАШАЊА, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
+        List<Topic> topicsForStudent = List.of(new Topic(topicCategory, "Subcategory name example", "Description example", "1.1.1", true, "Discussion example", nnsMeeting, student, professor, null));
         Mockito.when(studentService.topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId)).thenReturn(topicsForStudent);
 
         this.mockMvc
@@ -129,6 +155,18 @@ class StudentControllerTest {
         Mockito.verify(studentService, Mockito.times(1)).topicsForThisStudentFilteredBySpecs(student, categoryName, subCategoryName, professorId);
         Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
         Mockito.verify(professorService, Mockito.times(1)).findAll();
+
+        // Case categoryName == "Сите"
+        this.mockMvc
+                .perform(post("/students/{id}/topics-list", studentId)
+                        .param("categoryName", "Сите")
+                        .param("subCategoryName", subCategoryName)
+                        .param("professorId", professorId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attributeDoesNotExist("selectedCat"))
+                .andExpect(model().attribute("title", "Студенти"))
+                .andExpect(model().attribute("bodyContent", "students-page"));
     }
 
     @Test

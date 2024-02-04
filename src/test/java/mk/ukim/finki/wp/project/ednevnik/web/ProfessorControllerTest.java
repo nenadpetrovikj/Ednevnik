@@ -36,7 +36,7 @@ class ProfessorControllerTest {
     @MockBean
     private StudentService studentService;
 
-    // Paging test was way too complicated
+    // Paging test to be done some other time, because of time constraint
 
     @Test
     void filterByProfessor() throws Exception {
@@ -139,6 +139,18 @@ class ProfessorControllerTest {
         Mockito.verify(professorService, Mockito.times(2)).findAll();
         Mockito.verify(studentService, Mockito.times(1)).getAllStudentsInFormat();
         Mockito.verify(topicService, Mockito.times(1)).getAllSubCategories();
+
+        // Case categoryName == "Сите"
+        this.mockMvc
+                .perform(post("/professors/{id}/topics-list", professorId)
+                        .param("categoryName", "Сите")
+                        .param("subCategoryName", subCategoryName)
+                        .param("professorId", professorId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("master-template"))
+                .andExpect(model().attributeDoesNotExist("selectedCat"))
+                .andExpect(model().attribute("title", "Професори"))
+                .andExpect(model().attribute("bodyContent", "professors-page"));
     }
 
     @Test
@@ -173,7 +185,7 @@ class ProfessorControllerTest {
         Mockito.verify(professorService, Mockito.times(1)).findById(professorId);
     }
 
-    @Test // prepravi go kako student
+    @Test
     void professorAdd() throws Exception {
         Long professorIdToUpdate = 1L;
         String name = "John";
