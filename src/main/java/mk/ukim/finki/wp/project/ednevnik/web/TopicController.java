@@ -30,14 +30,11 @@ public class TopicController {
                               @RequestParam(required = false) String studentFullNameId,
                               @RequestParam(required = false) Long professorId,
                               @RequestParam(required = false) List<Long> professorsIds) {
-        try {
-            if (id != null)
-                topicService.update(id, categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeetingId, studentFullNameId, professorId, professorsIds);
-            else
-                topicService.create(categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeetingId, studentFullNameId, professorId, professorsIds);
-        } catch (StudentFormatException e) {
-            throw new RuntimeException(e);
-        }
+        if (id != null)
+            topicService.update(id, categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeetingId, studentFullNameId, professorId, professorsIds);
+        else
+            topicService.create(categoryName, subCategoryName, description, serialNumber, isAccepted, discussion, nnsMeetingId, studentFullNameId, professorId, professorsIds);
+
         return "redirect:/nns-meetings/" + nnsMeetingId + "/topics-list";
     }
 

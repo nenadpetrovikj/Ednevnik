@@ -109,11 +109,7 @@ public class StudentController {
         if (idOld != null) {
             studentService.update(idOld, idNew, name, surname);
         } else {
-            try {
-                studentService.create(name + ' ' + surname + ' ' + idNew);
-            } catch (StudentFormatException e) {
-                throw new RuntimeException(e);
-            }
+            studentService.create(name + ' ' + surname + ' ' + idNew);
         }
         return "redirect:/students";
     }
